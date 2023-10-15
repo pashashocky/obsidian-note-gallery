@@ -1,19 +1,19 @@
 import { App, MarkdownRenderChild } from "obsidian";
 import NoteGalleryPlugin from "./main";
 import getFileList from "./get-file-list";
-import getSettings from "./get-settings";
+import getSettings, { Settings } from "./get-settings";
 import buildVertical from "./build-vertical";
 
 export class noteGalleryInit extends MarkdownRenderChild {
   private _gallery: HTMLElement = null;
-  private _settings: { [key: string]: any } = {};
+  private _settings: Settings = {};
   private _fileList: { [key: string]: any } = {};
 
   constructor(
     public plugin: NoteGalleryPlugin,
     public src: string,
     public container: HTMLElement,
-    public app: App,
+    public app: App
   ) {
     super(container);
   }
@@ -27,13 +27,14 @@ export class noteGalleryInit extends MarkdownRenderChild {
       this.plugin,
       this.container,
       this._fileList,
-      this._settings,
+      this._settings
     );
   }
 
   async onunload() {
     // destroy the gallery
     if (this._gallery) {
+      this._gallery.destroy();
       this._gallery.remove();
       this._gallery = null;
     }

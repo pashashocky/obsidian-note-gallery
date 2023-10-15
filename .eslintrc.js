@@ -10,7 +10,6 @@ module.exports = {
   extends: [
     "plugin:import/typescript",
     "eslint:recommended",
-    "plugin:prettier/recommended",  
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended",
     "prettier"

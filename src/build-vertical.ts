@@ -4,18 +4,17 @@ import NoteGalleryPlugin from "./main";
 
 type ConstructableWorkspaceSplit = new (
   ws: Workspace,
-  dir: "horizontal" | "vertical",
+  dir: "horizontal" | "vertical"
 ) => WorkspaceSplit;
 
 const buildVertical = (
   plugin: NoteGalleryPlugin,
   container: HTMLElement,
   filesList: TFile[],
-  settings: Settings,
+  settings: Settings
 ) => {
   // inject the gallery wrapper
-  const gallery = container.createEl("div");
-  gallery.addClass("grid-wrapper");
+  const gallery = container.createDiv("grid-wrapper");
   gallery.style.lineHeight = "0px";
   gallery.style.columnCount = `${settings.columns}`;
   gallery.style.columnGap = `${settings.gutter}px`;
@@ -35,13 +34,10 @@ const buildVertical = (
     const rootSplit: WorkspaceSplit =
       new (WorkspaceSplit as ConstructableWorkspaceSplit)(
         window.app.workspace,
-        "vertical",
+        "vertical"
       );
 
     plugin.openLink(file, rootSplit, c);
-
-    const img = figure.createEl("img");
-    img.style.borderRadius = `${settings.radius}px`;
   });
 
   return gallery;
