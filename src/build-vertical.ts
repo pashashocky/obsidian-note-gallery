@@ -1,16 +1,17 @@
-import { TAbstractFile, TFile, Workspace, WorkspaceSplit } from "obsidian";
+import { TFile, Workspace, WorkspaceSplit } from "obsidian";
+import { Settings } from "./get-settings";
 import NoteGalleryPlugin from "./main";
 
 type ConstructableWorkspaceSplit = new (
   ws: Workspace,
-  dir: "horizontal" | "vertical"
+  dir: "horizontal" | "vertical",
 ) => WorkspaceSplit;
 
 const buildVertical = (
   plugin: NoteGalleryPlugin,
   container: HTMLElement,
-  filesList: { [key: string]: any },
-  settings: { [key: string]: any }
+  filesList: TFile[],
+  settings: Settings,
 ) => {
   // inject the gallery wrapper
   const gallery = container.createEl("div");
@@ -19,9 +20,8 @@ const buildVertical = (
   gallery.style.columnCount = `${settings.columns}`;
   gallery.style.columnGap = `${settings.gutter}px`;
 
-  console.log({ filesList });
   // inject and style files
-  filesList.forEach((file: TFile) => {
+  filesList.slice(0, 10).forEach((file: TFile) => {
     const figure = gallery.createDiv("grid-item");
     figure.style.marginBottom = `${settings.gutter}px`;
     // figure.style.width = "100%";
@@ -35,7 +35,7 @@ const buildVertical = (
     const rootSplit: WorkspaceSplit =
       new (WorkspaceSplit as ConstructableWorkspaceSplit)(
         window.app.workspace,
-        "vertical"
+        "vertical",
       );
 
     plugin.openLink(file, rootSplit, c);

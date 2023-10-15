@@ -2,7 +2,6 @@ import { App, MarkdownRenderChild } from "obsidian";
 import NoteGalleryPlugin from "./main";
 import getFileList from "./get-file-list";
 import getSettings from "./get-settings";
-import buildHorizontal from "./build-horizontal";
 import buildVertical from "./build-vertical";
 
 export class noteGalleryInit extends MarkdownRenderChild {
@@ -14,7 +13,7 @@ export class noteGalleryInit extends MarkdownRenderChild {
     public plugin: NoteGalleryPlugin,
     public src: string,
     public container: HTMLElement,
-    public app: App
+    public app: App,
   ) {
     super(container);
   }
@@ -24,22 +23,12 @@ export class noteGalleryInit extends MarkdownRenderChild {
     this._settings = getSettings(this.src, this.container);
     this._fileList = getFileList(this.app, this.container, this._settings);
 
-    // inject the pertinent kind of gallery
-    if (this._settings.type === "horizontal") {
-      this._gallery = buildHorizontal(
-        this.plugin,
-        this.container,
-        this._fileList,
-        this._settings
-      );
-    } else if (this._settings.type === "vertical") {
-      this._gallery = buildVertical(
-        this.plugin,
-        this.container,
-        this._fileList,
-        this._settings
-      );
-    }
+    this._gallery = buildVertical(
+      this.plugin,
+      this.container,
+      this._fileList,
+      this._settings,
+    );
   }
 
   async onunload() {

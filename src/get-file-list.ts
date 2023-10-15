@@ -1,11 +1,8 @@
 import { App, TFolder, TFile } from "obsidian";
+import { Settings } from "./get-settings";
 import renderError from "./render-error";
 
-const getFileList = (
-  app: App,
-  container: HTMLElement,
-  settings: { [key: string]: any }
-) => {
+const getFileList = (app: App, container: HTMLElement, settings: Settings) => {
   // retrieve a list of the files
   const folder = app.vault.getAbstractFileByPath(settings.path);
   let files;

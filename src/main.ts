@@ -61,14 +61,14 @@ export default class NoteGalleryPlugin extends Plugin {
     openState?: OpenViewState,
     useLeaf?: WorkspaceLeaf,
     rootSplit?: WorkspaceSplit,
-    el?: HTMLElement
+    el?: HTMLElement,
   ) {
     // if (this.detaching) return;
     const leaf = useLeaf ?? this.attachLeaf(rootSplit, el);
     console.log("openFile", { file, openState, useLeaf });
     this.opening = true;
     try {
-      // await leaf.openFile(file, openState);
+      await leaf.openFile(file, openState);
       // if (this.plugin.settings.autoFocus && !this.detaching) {
       //   this.whenShown(() => {
       //     // Don't set focus so as not to activate the Obsidian window during unfocused mouseover
@@ -129,7 +129,7 @@ export default class NoteGalleryPlugin extends Plugin {
     file: TFile,
     rootSplit: WorkspaceSplit,
     el: HTMLElement,
-    createInLeaf?: WorkspaceLeaf
+    createInLeaf?: WorkspaceLeaf,
   ) {
     const link = parseLinktext(file.path);
     console.log({ link, file });

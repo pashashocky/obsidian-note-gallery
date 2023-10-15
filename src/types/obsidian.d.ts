@@ -94,7 +94,7 @@ declare module "obsidian" {
     static registerDomEvents(
       el: HTMLElement,
       handlerInstance: unknown,
-      cb: (el: HTMLElement) => unknown
+      cb: (el: HTMLElement) => unknown,
     ): void;
   }
 
@@ -102,7 +102,7 @@ declare module "obsidian" {
     openLinkText(
       linkText: string,
       path: string,
-      state?: unknown
+      state?: unknown,
     ): Promise<void>;
     updateHeader(): void;
     containerEl: HTMLDivElement;
@@ -114,11 +114,11 @@ declare module "obsidian" {
     recordHistory(leaf: WorkspaceLeaf, pushHistory: boolean): void;
     iterateLeaves(
       callback: (item: WorkspaceLeaf) => boolean | void,
-      item: WorkspaceItem | WorkspaceItem[]
+      item: WorkspaceItem | WorkspaceItem[],
     ): boolean;
     iterateLeaves(
       item: WorkspaceItem | WorkspaceItem[],
-      callback: (item: WorkspaceLeaf) => boolean | void
+      callback: (item: WorkspaceLeaf) => boolean | void,
     ): boolean;
     getDropLocation(event: MouseEvent): {
       target: WorkspaceItem;
@@ -126,7 +126,7 @@ declare module "obsidian" {
     };
     recursiveGetTarget(
       event: MouseEvent,
-      parent: WorkspaceParent
+      parent: WorkspaceParent,
     ): WorkspaceItem;
     recordMostRecentOpenedFile(file: TFile): void;
     onDragLeaf(event: MouseEvent, leaf: WorkspaceLeaf): void;

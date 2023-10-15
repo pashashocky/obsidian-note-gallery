@@ -1,6 +1,17 @@
 import { normalizePath, parseYaml, Platform } from "obsidian";
 import renderError from "./render-error";
 
+export interface Settings {
+  path: string;
+  radius: number;
+  gutter: string;
+  sortby: string;
+  sort: string;
+  mobile: number;
+  columns: number;
+  height: number;
+}
+
 const getSettings = (src: string, container: HTMLElement) => {
   // parse the settings from the code block
   const settingsSrc: any = parseYaml(src);
@@ -19,9 +30,8 @@ const getSettings = (src: string, container: HTMLElement) => {
   }
 
   // store settings, normalize and set sensible defaults
-  const settings = {
+  const settings: Settings = {
     path: undefined as string,
-    type: undefined as string,
     radius: undefined as number,
     gutter: undefined as string,
     sortby: undefined as string,
@@ -32,7 +42,6 @@ const getSettings = (src: string, container: HTMLElement) => {
   };
 
   settings.path = normalizePath(settingsSrc.path);
-  settings.type = settingsSrc.type ?? "horizontal";
   settings.radius = settingsSrc.radius ?? 0;
   settings.gutter = settingsSrc.gutter ?? 8;
   settings.sortby = settingsSrc.sortby ?? "mtime";
