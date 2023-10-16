@@ -16,14 +16,21 @@ const getFileList = (app: App, container: HTMLElement, settings: Settings) => {
 
   // filter the list of files to make sure we're dealing with .md only
   const validExtensions = ["md"];
-  files = files.filter(file => {
-    if (file instanceof TFile && validExtensions.includes(file.extension)) return file;
+  files = files.filter((file) => {
+    if (file instanceof TFile && validExtensions.includes(file.extension))
+      return file;
   });
 
   // sort the list by mtime, or ctime
   files = files.sort((a: any, b: any) => {
-    const refA = settings.sortby === "name" ? a["name"].toUpperCase() : a.stat[settings.sortby];
-    const refB = settings.sortby === "name" ? b["name"].toUpperCase() : b.stat[settings.sortby];
+    const refA =
+      settings.sortby === "name"
+        ? a["name"].toUpperCase()
+        : a.stat[settings.sortby];
+    const refB =
+      settings.sortby === "name"
+        ? b["name"].toUpperCase()
+        : b.stat[settings.sortby];
     return refA < refB ? -1 : refA > refB ? 1 : 0;
   });
 

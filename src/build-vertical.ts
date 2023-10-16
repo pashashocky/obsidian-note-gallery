@@ -2,9 +2,17 @@ import { TFile, Workspace, WorkspaceSplit } from "obsidian";
 import { Settings } from "./get-settings";
 import NoteGalleryPlugin from "./main";
 
-type ConstructableWorkspaceSplit = new (ws: Workspace, dir: "horizontal" | "vertical") => WorkspaceSplit;
+type ConstructableWorkspaceSplit = new (
+  ws: Workspace,
+  dir: "horizontal" | "vertical"
+) => WorkspaceSplit;
 
-const buildVertical = (plugin: NoteGalleryPlugin, container: HTMLElement, filesList: TFile[], settings: Settings) => {
+const buildVertical = (
+  plugin: NoteGalleryPlugin,
+  container: HTMLElement,
+  filesList: TFile[],
+  settings: Settings
+) => {
   // inject the gallery wrapper
   const gallery = container.createDiv("grid-wrapper");
   gallery.style.lineHeight = "0px";
@@ -23,10 +31,11 @@ const buildVertical = (plugin: NoteGalleryPlugin, container: HTMLElement, filesL
 
     const c = figure.createDiv("grid-content");
 
-    const rootSplit: WorkspaceSplit = new (WorkspaceSplit as ConstructableWorkspaceSplit)(
-      window.app.workspace,
-      "vertical",
-    );
+    const rootSplit: WorkspaceSplit =
+      new (WorkspaceSplit as ConstructableWorkspaceSplit)(
+        window.app.workspace,
+        "vertical"
+      );
 
     plugin.openLink(file, rootSplit, c);
   });
