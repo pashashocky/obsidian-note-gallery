@@ -9,12 +9,7 @@ export class noteGalleryInit extends MarkdownRenderChild {
   private _settings: Settings = {};
   private _fileList: { [key: string]: any } = {};
 
-  constructor(
-    public plugin: NoteGalleryPlugin,
-    public src: string,
-    public container: HTMLElement,
-    public app: App
-  ) {
+  constructor(public plugin: NoteGalleryPlugin, public src: string, public container: HTMLElement, public app: App) {
     super(container);
   }
 
@@ -23,12 +18,7 @@ export class noteGalleryInit extends MarkdownRenderChild {
     this._settings = getSettings(this.src, this.container);
     this._fileList = getFileList(this.app, this.container, this._settings);
 
-    this._gallery = buildVertical(
-      this.plugin,
-      this.container,
-      this._fileList,
-      this._settings
-    );
+    this._gallery = buildVertical(this.plugin, this.container, this._fileList, this._settings);
   }
 
   async onunload() {

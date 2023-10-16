@@ -29,7 +29,7 @@ esbuild
     minify: prod ? true : false,
     entryPoints: ["src/main.ts"],
     bundle: true,
-    external: ["obsidian", "electron", "codemirror", "@codemirror/view", ...builtins],
+    external: ["obsidian", "electron", "codemirror", "@codemirror/view", "@codemirror/state", ...builtins],
     format: "cjs",
     watch: !prod,
     target: "ES2018",

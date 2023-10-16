@@ -91,19 +91,11 @@ declare module "obsidian" {
     editorEl: HTMLElement;
   }
   class MarkdownPreviewRendererStatic extends MarkdownPreviewRenderer {
-    static registerDomEvents(
-      el: HTMLElement,
-      handlerInstance: unknown,
-      cb: (el: HTMLElement) => unknown
-    ): void;
+    static registerDomEvents(el: HTMLElement, handlerInstance: unknown, cb: (el: HTMLElement) => unknown): void;
   }
 
   interface WorkspaceLeaf {
-    openLinkText(
-      linkText: string,
-      path: string,
-      state?: unknown
-    ): Promise<void>;
+    openLinkText(linkText: string, path: string, state?: unknown): Promise<void>;
     updateHeader(): void;
     containerEl: HTMLDivElement;
     working: boolean;
@@ -112,22 +104,13 @@ declare module "obsidian" {
   }
   interface Workspace {
     recordHistory(leaf: WorkspaceLeaf, pushHistory: boolean): void;
-    iterateLeaves(
-      callback: (item: WorkspaceLeaf) => boolean | void,
-      item: WorkspaceItem | WorkspaceItem[]
-    ): boolean;
-    iterateLeaves(
-      item: WorkspaceItem | WorkspaceItem[],
-      callback: (item: WorkspaceLeaf) => boolean | void
-    ): boolean;
+    iterateLeaves(callback: (item: WorkspaceLeaf) => boolean | void, item: WorkspaceItem | WorkspaceItem[]): boolean;
+    iterateLeaves(item: WorkspaceItem | WorkspaceItem[], callback: (item: WorkspaceLeaf) => boolean | void): boolean;
     getDropLocation(event: MouseEvent): {
       target: WorkspaceItem;
       sidedock: boolean;
     };
-    recursiveGetTarget(
-      event: MouseEvent,
-      parent: WorkspaceParent
-    ): WorkspaceItem;
+    recursiveGetTarget(event: MouseEvent, parent: WorkspaceParent): WorkspaceItem;
     recordMostRecentOpenedFile(file: TFile): void;
     onDragLeaf(event: MouseEvent, leaf: WorkspaceLeaf): void;
     onLayoutChange(): void; // tell Obsidian leaves have been added/removed/etc.
