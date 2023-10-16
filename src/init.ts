@@ -24,7 +24,6 @@ export class noteGalleryInit extends MarkdownRenderChild {
   async onunload() {
     // destroy the gallery
     if (this._gallery) {
-      this._gallery.destroy();
       this._gallery.remove();
       this._gallery = null;
     }
