@@ -6,34 +6,34 @@
 .grid-item .grid-content,
 .grid-item .workspace-leaf,
 .grid-item .workspace-split {
-  height: 330px;
-  width: 200px;
+	height: 330px;
+	width: 200px;
 }
 
 .grid-item .workspace-leaf .view-header {
-  /* hide navigation pane of leaf */
-  display: none;
+	/* hide navigation pane of leaf */
+	display: none;
 }
 
 .grid-item .markdown-reading-view .mod-header .metadata-container {
-  /* hide properties/metadata */
-  display: none;
+	/* hide properties/metadata */
+	display: none;
 }
 
 .grid-item .markdown-reading-view .mod-footer {
-  /* hide properties/metadata */
-  display: none;
+	/* hide properties/metadata */
+	display: none;
 }
 
 .grid-item .markdown-reading-view .mod-header .inline-title {
-  font-size: 14pt;
+	font-size: 14pt;
 }
 
 .grid-item .markdown-reading-view .markdown-preview-view {
-  padding: 15px;
+	padding: 15px;
 }
 
 .grid-item .markdown-reading-view .markdown-preview-section {
-  font-size: 8pt;
-  padding-bottom: 0px !important;
+	font-size: 8pt;
+	padding-bottom: 0px !important;
 }
