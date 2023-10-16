@@ -1,8 +1,18 @@
 import { App, MarkdownRenderChild } from "obsidian";
-import { StrictMode } from "react";
+import { StrictMode, useState } from "react";
 import { createRoot, Root } from "react-dom/client";
 
 import NoteGalleryPlugin from "../main";
+
+const View = () => {
+  const [v, setV] = useState(0);
+  return (
+    <div>
+      <h1>Test {v}</h1>
+      <button onClick={() => setV(v + 1)}>inc!</button>
+    </div>
+  );
+};
 
 export default class CodeBlockNoteGallery extends MarkdownRenderChild {
   private root: Root | null;
@@ -21,7 +31,7 @@ export default class CodeBlockNoteGallery extends MarkdownRenderChild {
     this.root = createRoot(this.containerEl);
     this.root.render(
       <StrictMode>
-        <h1>Test</h1>
+        <View />
       </StrictMode>,
     );
   }
