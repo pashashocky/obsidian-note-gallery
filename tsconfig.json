@@ -1,15 +1,10 @@
 {
   "compilerOptions": {
+    "allowJs": true,
     "baseUrl": ".",
+    "importHelpers": true,
     "inlineSourceMap": true,
     "inlineSources": true,
-    "module": "ESNext",
-    "target": "ES2018",
-    "allowJs": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "moduleResolution": "node",
-    "importHelpers": true,
     "lib": [
       "DOM",
       "ES5",
@@ -17,7 +12,12 @@
       "ES7",
       "ES2017",
       "ES2018"
-    ]
+    ],
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "target": "ES2018"
   },
   "include": [
     "**/*.ts"
