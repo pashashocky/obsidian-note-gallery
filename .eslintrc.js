@@ -2,25 +2,24 @@ module.exports = {
   root: true,
   parser: "@typescript-eslint/parser",
   parserOptions: {
-    ecmaVersion: 2018,
+    ecmaVersion: "latest",
     sourceType: "module",
     project: ["tsconfig.json", ".eslintrc.js"],
     tsconfigRootDir: __dirname,
   },
   extends: [
-    "plugin:import/typescript",
+    "plugin:react-hooks/recommended",
     "eslint:recommended",
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended",
-    "prettier"
+    "plugin:import/typescript",
   ],
   env: {
     browser: true,
     node: true,
+    es2020: true,
   },
-  plugins: [
-    "@typescript-eslint",
-  ],
+  plugins: ["@typescript-eslint"],
   settings: {
     "import/parsers": {
       "@typescript-eslint/parser": [".ts", ".tsx"],
@@ -68,6 +67,7 @@ module.exports = {
     "no-prototype-builtins": "off",
     "function-paren-newline": "off",
     "@typescript-eslint/no-empty-function": "off",
+    "react-hooks/exhaustive-deps": "error",
   },
   overrides: [
     {

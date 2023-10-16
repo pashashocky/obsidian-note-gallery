@@ -1,10 +1,10 @@
 {
-	"id": "obsidian-note-gallery",
-	"name": "Note Gallery",
-	"version": "0.0.1",
-	"minAppVersion": "1.1.8",
-	"description": "A masonry note gallery for Obsidian.",
-	"author": "Pash Shocky",
-	"authorUrl": "https://github.com/pashashocky",
-	"isDesktopOnly": false
+  "id": "obsidian-note-gallery",
+  "name": "Note Gallery",
+  "version": "0.0.1",
+  "minAppVersion": "1.2.0",
+  "description": "A masonry note gallery for Obsidian.",
+  "author": "Pash Shocky",
+  "authorUrl": "https://github.com/pashashocky",
+  "isDesktopOnly": false
 }
