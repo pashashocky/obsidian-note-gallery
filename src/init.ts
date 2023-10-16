@@ -5,37 +5,37 @@ import getSettings, { Settings } from "./get-settings";
 import buildVertical from "./build-vertical";
 
 export class noteGalleryInit extends MarkdownRenderChild {
-	private _gallery: HTMLElement = null;
-	private _settings: Settings = {};
-	private _fileList: { [key: string]: any } = {};
+  private _gallery: HTMLElement = null;
+  private _settings: Settings = {};
+  private _fileList: { [key: string]: any } = {};
 
-	constructor(
-		public plugin: NoteGalleryPlugin,
-		public src: string,
-		public container: HTMLElement,
-		public app: App
-	) {
-		super(container);
-	}
+  constructor(
+    public plugin: NoteGalleryPlugin,
+    public src: string,
+    public container: HTMLElement,
+    public app: App
+  ) {
+    super(container);
+  }
 
-	async onload() {
-		// parse and normalize settings
-		this._settings = getSettings(this.src, this.container);
-		this._fileList = getFileList(this.app, this.container, this._settings);
+  async onload() {
+    // parse and normalize settings
+    this._settings = getSettings(this.src, this.container);
+    this._fileList = getFileList(this.app, this.container, this._settings);
 
-		this._gallery = buildVertical(
-			this.plugin,
-			this.container,
-			this._fileList,
-			this._settings
-		);
-	}
+    this._gallery = buildVertical(
+      this.plugin,
+      this.container,
+      this._fileList,
+      this._settings
+    );
+  }
 
-	async onunload() {
-		// destroy the gallery
-		if (this._gallery) {
-			this._gallery.remove();
-			this._gallery = null;
-		}
-	}
+  async onunload() {
+    // destroy the gallery
+    if (this._gallery) {
+      this._gallery.remove();
+      this._gallery = null;
+    }
+  }
 }
