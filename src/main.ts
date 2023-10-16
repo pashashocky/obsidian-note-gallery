@@ -52,7 +52,7 @@ export default class NoteGalleryPlugin extends Plugin {
     openState?: OpenViewState,
     useLeaf?: WorkspaceLeaf,
     rootSplit?: WorkspaceSplit,
-    el?: HTMLElement
+    el?: HTMLElement,
   ) {
     // if (this.detaching) return;
     const leaf = useLeaf ?? this.attachLeaf(rootSplit, el);
@@ -75,7 +75,7 @@ export default class NoteGalleryPlugin extends Plugin {
     file: TFile,
     rootSplit: WorkspaceSplit,
     el: HTMLElement,
-    createInLeaf?: WorkspaceLeaf
+    createInLeaf?: WorkspaceLeaf,
   ) {
     const link = parseLinktext(file.path);
     console.log({ link, file });

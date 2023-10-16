@@ -2,21 +2,39 @@ import { TFile, Workspace, WorkspaceSplit } from "obsidian";
 import { Settings } from "./get-settings";
 import NoteGalleryPlugin from "./main";
 
-import { StrictMode, useState } from "react";
+import { StrictMode, useEffect, useState } from "react";
 import { ItemView, WorkspaceLeaf } from "obsidian";
 import { Root, createRoot } from "react-dom/client";
 
 type ConstructableWorkspaceSplit = new (
   ws: Workspace,
-  dir: "horizontal" | "vertical"
+  dir: "horizontal" | "vertical",
 ) => WorkspaceSplit;
 
-const ReactView = () => {
+const ReactView = ({ app, plugin, filesList }) => {
   const [v, setV] = useState(3);
+  const rootSplit: WorkspaceSplit =
+    new (WorkspaceSplit as ConstructableWorkspaceSplit)(
+      window.app.workspace,
+      "vertical",
+    );
+  rootSplit.getRoot = () => app.workspace["rootSplit"]!;
+  rootSplit.getContainer = () => plugin.containerForDocument();
+  console.log({ rootSplit });
+  console.log("attachLeaf", { rootSplit: rootSplit });
+  const leaf = plugin.app.workspace.createLeafInParent(rootSplit, 0);
+  // const parentMode = plugin.getDefaultMode();
+  // const state = plugin.buildState(parentMode);
+  // await leaf.openFile(filesList[0], state);
+
   return (
     <div>
       <h1>{v}</h1>
       <button onClick={() => setV(v + 1)}>bump up</button>
+      {/*<div
+        style={{ height: "1000px" }}
+        dangerouslySetInnerHTML={{ __html: rootSplit.containerEl.innerHTML }}
+      />*/}
     </div>
   );
 };
@@ -25,7 +43,7 @@ const buildVertical = (
   plugin: NoteGalleryPlugin,
   container: HTMLElement,
   filesList: TFile[],
-  settings: Settings
+  settings: Settings,
 ) => {
   // inject the gallery wrapper
   // const gallery = container.createDiv("grid-wrapper");
@@ -56,8 +74,8 @@ const buildVertical = (
   const root: Root = createRoot(container);
   root.render(
     <StrictMode>
-      <ReactView />
-    </StrictMode>
+      <ReactView app={app} plugin={plugin} filesList={filesList} />
+    </StrictMode>,
   );
 
   return root;
