@@ -16,7 +16,7 @@ const getFileList = (app: App, container: HTMLElement, settings: Settings) => {
 
   // filter the list of files to make sure we're dealing with .md only
   const validExtensions = ["md"];
-  files = files.filter((file) => {
+  files = files.filter(file => {
     if (file instanceof TFile && validExtensions.includes(file.extension))
       return file;
   });
