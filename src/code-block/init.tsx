@@ -1,4 +1,4 @@
-import { App, MarkdownRenderChild, TAbstractFile } from "obsidian";
+import { App, MarkdownRenderChild, TFile } from "obsidian";
 import { StrictMode } from "react";
 import { createRoot, Root } from "react-dom/client";
 import Masonry from "react-masonry-css";
@@ -7,7 +7,7 @@ import NoteGalleryPlugin from "../main";
 import getFileList from "./get-file-list";
 import getSettings, { Settings } from "./get-settings";
 
-const View = ({ app, files }: { app: App; files: TAbstractFile[] }) => {
+const View = ({ app, files }: { app: App; files: TFile[] }) => {
   const breakpointColumnsObj = {
     default: 10,
     3100: 8,
@@ -41,13 +41,13 @@ const View = ({ app, files }: { app: App; files: TAbstractFile[] }) => {
 export default class CodeBlockNoteGallery extends MarkdownRenderChild {
   private root: Root | null;
   private settings: Settings;
-  private files: TAbstractFile[];
+  private files: TFile[];
 
   constructor(
     public plugin: NoteGalleryPlugin,
     public src: string,
     public containerEl: HTMLElement,
-    public app: App
+    public app: App,
   ) {
     super(containerEl);
     this.root = null;
@@ -60,7 +60,7 @@ export default class CodeBlockNoteGallery extends MarkdownRenderChild {
     this.root.render(
       <StrictMode>
         <View app={this.app} files={this.files} />
-      </StrictMode>
+      </StrictMode>,
     );
   }
 

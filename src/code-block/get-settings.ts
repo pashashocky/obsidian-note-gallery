@@ -4,13 +4,24 @@ import renderError from "./render-error";
 export interface Settings {
   path: string;
   radius: number;
-  gutter: string;
+  gutter: number;
   sortby: string;
   sort: string;
   mobile: number;
   columns: number;
   height: number;
 }
+
+const DEFAULT_SETTINGS: Settings = {
+  path: "",
+  radius: 0,
+  gutter: 8,
+  sortby: "mtime",
+  sort: "desc",
+  mobile: 1,
+  columns: 0,
+  height: 260,
+};
 
 const getSettings = (src: string, container: HTMLElement) => {
   // parse the settings from the code block
@@ -30,16 +41,7 @@ const getSettings = (src: string, container: HTMLElement) => {
   }
 
   // store settings, normalize and set sensible defaults
-  const settings: Settings = {
-    path: undefined as string,
-    radius: undefined as number,
-    gutter: undefined as string,
-    sortby: undefined as string,
-    sort: undefined as string,
-    mobile: undefined as number,
-    columns: undefined as number,
-    height: undefined as number,
-  };
+  const settings: Settings = DEFAULT_SETTINGS;
 
   settings.path = normalizePath(settingsSrc.path);
   settings.radius = settingsSrc.radius ?? 0;
