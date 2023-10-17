@@ -1,4 +1,4 @@
-import { App, TFolder, TFile } from "obsidian";
+import { App, TFolder, TFile, TAbstractFile } from "obsidian";
 import { Settings } from "./get-settings";
 import renderError from "./render-error";
 
@@ -15,14 +15,15 @@ const getFileList = (app: App, container: HTMLElement, settings: Settings) => {
   }
 
   // filter the list of files to make sure we're dealing with .md only
-  const validExtensions = ["md"];
-  files = files.filter(file => {
+  // const validExtensions = ["md"];
+  const validExtensions = ["jpeg", "jpg", "gif", "png", "webp", "tiff", "tif"];
+  files = files.filter((file) => {
     if (file instanceof TFile && validExtensions.includes(file.extension))
       return file;
   });
 
   // sort the list by mtime, or ctime
-  files = files.sort((a: any, b: any) => {
+  files = files.sort((a: TFile, b: TFile) => {
     const refA =
       settings.sortby === "name"
         ? a["name"].toUpperCase()

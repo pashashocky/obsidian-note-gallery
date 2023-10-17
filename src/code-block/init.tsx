@@ -1,38 +1,66 @@
-import { App, MarkdownRenderChild } from "obsidian";
-import { StrictMode, useState } from "react";
+import { App, MarkdownRenderChild, TAbstractFile } from "obsidian";
+import { StrictMode } from "react";
 import { createRoot, Root } from "react-dom/client";
+import Masonry from "react-masonry-css";
 
 import NoteGalleryPlugin from "../main";
+import getFileList from "./get-file-list";
+import getSettings, { Settings } from "./get-settings";
 
-const View = () => {
-  const [v, setV] = useState(0);
+const View = ({ app, files }: { app: App; files: TAbstractFile[] }) => {
+  const breakpointColumnsObj = {
+    default: 10,
+    3100: 8,
+    2700: 7,
+    2300: 6,
+    1900: 5,
+    1500: 4,
+    1000: 3,
+    700: 2,
+    500: 1,
+  };
   return (
     <div>
-      <h1>Test {v}</h1>
-      <button onClick={() => setV(v + 1)}>inc!</button>
+      <Masonry
+        breakpointCols={breakpointColumnsObj}
+        className="my-masonry-grid"
+        columnClassName="my-masonry-grid_column"
+      >
+        {files.map(function (file) {
+          return (
+            <div key={file.name}>
+              <img src={app.vault.adapter.getResourcePath(file.path)} />
+            </div>
+          );
+        })}
+      </Masonry>
     </div>
   );
 };
 
 export default class CodeBlockNoteGallery extends MarkdownRenderChild {
   private root: Root | null;
+  private settings: Settings;
+  private files: TAbstractFile[];
 
   constructor(
     public plugin: NoteGalleryPlugin,
     public src: string,
     public containerEl: HTMLElement,
-    public app: App,
+    public app: App
   ) {
     super(containerEl);
     this.root = null;
+    this.settings = getSettings(src, containerEl);
+    this.files = getFileList(app, containerEl, this.settings);
   }
 
   async onload() {
     this.root = createRoot(this.containerEl);
     this.root.render(
       <StrictMode>
-        <View />
-      </StrictMode>,
+        <View app={this.app} files={this.files} />
+      </StrictMode>
     );
   }
 
