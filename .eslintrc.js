@@ -44,7 +44,7 @@ module.exports = {
     "import/no-unresolved": "off",
     "linebreak-style": ["error", "unix"],
     "@typescript-eslint/no-non-null-assertion": "off",
-    "@typescript-eslint/no-unused-vars": ["error", { args: "none" }],
+    "@typescript-eslint/no-unused-vars": ["error", { args: "none", ignoreRestSiblings: true }],
     "@typescript-eslint/ban-ts-comment": "off",
     "@typescript-eslint/ban-types": [
       "error",

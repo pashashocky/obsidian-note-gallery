@@ -12,7 +12,7 @@ if you want to view the source, please visit the github repository of this plugi
 const staticAssetsPlugin = {
   name: "static-assets-plugin",
   setup(build) {
-    build.onLoad({ filter: /.+/ }, args => {
+    build.onLoad({ filter: /.+/ }, () => {
       return {
         watchFiles: ["styles.css", "esbuild.config.mjs"],
       };
@@ -63,23 +63,6 @@ esbuild
     sourcemap: prod ? false : "inline",
     target: "es2016",
     treeShaking: true,
-    watch: prod
-      ? false
-      : {
-          onRebuild(error) {
-            if (error) console.error("watch build failed:", error);
-            else
-              fs.rename("main.css", "styles.css", err => {
-                if (err) console.log(err);
-              });
-          },
-        },
-  })
-  .then(() => {
-    if (prod) {
-      fs.rename("main.css", "styles.css", err => {
-        if (err) console.log(err);
-      });
-    }
+    watch: !prod,
   })
   .catch(() => process.exit(1));

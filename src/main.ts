@@ -1,5 +1,5 @@
 import { Plugin } from "obsidian";
-import CodeBlockNoteGallery from "./code-block/init";
+import CodeBlockNoteGallery from "./code-block";
 
 export default class NoteGalleryPlugin extends Plugin {
   /**
