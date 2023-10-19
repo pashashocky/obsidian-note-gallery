@@ -48,7 +48,8 @@ class Masonry extends React.Component<MasonryPropsType, { columnCount: number }>
 
     // Correct scope for when methods are accessed externally
     this.reCalculateColumnCount = this.reCalculateColumnCount.bind(this);
-    this.reCalculateColumnCountDebounce = this.reCalculateColumnCountDebounce.bind(this);
+    this.reCalculateColumnCountDebounce =
+      this.reCalculateColumnCountDebounce.bind(this);
 
     // default state
     const { breakpointCols } = props;

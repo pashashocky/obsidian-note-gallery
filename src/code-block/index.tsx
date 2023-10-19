@@ -1,11 +1,16 @@
-import { App, MarkdownRenderChild, TFile } from "obsidian";
+import {
+  App,
+  MarkdownPostProcessorContext,
+  MarkdownRenderChild,
+  TFile,
+} from "obsidian";
 import { StrictMode } from "react";
 import { createRoot, Root } from "react-dom/client";
 import Masonry from "../masonry";
 
 import NoteGalleryPlugin from "../main";
-import getFileList from "./get-file-list";
-import getSettings, { Settings } from "./get-settings";
+import getFileList from "./files";
+import getSettings, { Settings } from "./settings";
 
 const View = ({ app, files }: { app: App; files: TFile[] }) => {
   const breakpointColumnsObj = {
@@ -17,7 +22,7 @@ const View = ({ app, files }: { app: App; files: TFile[] }) => {
     1500: 5,
     1000: 4,
     700: 3,
-    350: 2,
+    400: 2,
   };
   return (
     <div>
@@ -43,10 +48,16 @@ export default class CodeBlockNoteGallery extends MarkdownRenderChild {
   private settings: Settings;
   private files: TFile[];
 
-  constructor(public plugin: NoteGalleryPlugin, public src: string, public containerEl: HTMLElement, public app: App) {
+  constructor(
+    public plugin: NoteGalleryPlugin,
+    public src: string,
+    public containerEl: HTMLElement,
+    public app: App,
+    public ctx: MarkdownPostProcessorContext,
+  ) {
     super(containerEl);
     this.root = null;
-    this.settings = getSettings(src, containerEl);
+    this.settings = getSettings(src, app, containerEl, ctx);
     this.files = getFileList(app, containerEl, this.settings);
   }
 

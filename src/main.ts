@@ -8,7 +8,7 @@ export default class NoteGalleryPlugin extends Plugin {
    */
   async onload() {
     this.registerMarkdownCodeBlockProcessor("note-gallery", (src, el, ctx) => {
-      const handler = new CodeBlockNoteGallery(this, src, el, this.app);
+      const handler = new CodeBlockNoteGallery(this, src, el, this.app, ctx);
       ctx.addChild(handler);
     });
   }
