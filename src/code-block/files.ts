@@ -1,6 +1,10 @@
-import { App, TFolder, TFile, FileStats, TAbstractFile } from "obsidian";
+import { App, TFolder, TFile, FileStats, TAbstractFile, Vault } from "obsidian";
 import { Settings } from "./settings";
 import renderError from "./errors";
+
+type WVault = Vault & {
+  getAbstractFileByPathInsensitive?: null | ((path: string) => TAbstractFile | null);
+};
 
 const VALID_EXTENSIONS = ["jpeg", "jpg", "gif", "png", "webp", "tiff", "tif"];
 
@@ -14,12 +18,21 @@ const getChildren = (children: TAbstractFile[], recursive = false) =>
     return acc;
   }, [] as Array<TFile>);
 
+const getPath = (app: App, path: string) => {
+  const { vault } = app;
+  const wVault: WVault = vault;
+  if (wVault.getAbstractFileByPathInsensitive) {
+    return wVault.getAbstractFileByPathInsensitive(path);
+  }
+  return vault.getAbstractFileByPath(path);
+};
+
 const getFileList = (app: App, container: HTMLElement, settings: Settings) => {
   // retrieve a list of files in the settings.path
   // and if specified by settings.recursive fetch the files
   // in all the subfolders.
   let files: TFile[];
-  const folder = app.vault.getAbstractFileByPath(settings.path);
+  const folder = getPath(app, settings.path);
   if (folder instanceof TFolder) {
     files = getChildren(folder.children, settings.recursive);
   } else {
