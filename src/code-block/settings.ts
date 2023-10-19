@@ -3,6 +3,7 @@ import renderError from "./errors";
 
 export interface Settings {
   path: string;
+  limit: number;
   recursive: boolean;
   sort: "asc" | "desc";
   sortby: "name" | "mtime" | "ctime";
@@ -10,6 +11,7 @@ export interface Settings {
 
 const DEFAULT_SETTINGS: Settings = {
   path: "",
+  limit: 0,
   recursive: true,
   sort: "desc",
   sortby: "mtime",
@@ -49,6 +51,7 @@ const getSettings = (
     settings.path = settingsSrc.path;
   }
   settings.path = normalizePath(settings.path);
+  settings.limit = settingsSrc?.limit ?? settings.limit;
   settings.recursive = settingsSrc?.recursive ?? settings.recursive;
   settings.sort = settingsSrc?.sort ?? settings.sort;
   settings.sortby = settingsSrc?.sortby ?? settings.sortby;

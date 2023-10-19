@@ -43,6 +43,7 @@ const getFileList = (app: App, container: HTMLElement, settings: Settings) => {
       return refA < refB ? -1 : refA > refB ? 1 : 0;
     });
   files = settings.sort === "asc" ? files : files.reverse();
+  files = settings.limit === 0 ? files : files.splice(0, settings.limit);
 
   return files;
 };
