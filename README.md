@@ -29,3 +29,5 @@ sort: desc           # optional: desc | asc
 sortby: mtime        # optional: mtime | ctime | name
 ~~~~
 ```
+
+- please feel free to leave any bugs or feature requests in issues.
