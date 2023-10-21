@@ -62,7 +62,6 @@ export default class CodeBlockNoteGallery extends MarkdownRenderChild {
   }
 
   async onload() {
-    console.log("test verification");
     this.root = createRoot(this.containerEl);
     this.root.render(
       <StrictMode>
