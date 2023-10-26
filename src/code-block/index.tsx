@@ -4,13 +4,27 @@ import {
   MarkdownRenderChild,
   TFile,
 } from "obsidian";
-import { StrictMode } from "react";
+import { PropsWithChildren, StrictMode } from "react";
 import { createRoot, Root } from "react-dom/client";
 import Masonry from "masonry";
 
 import NoteGalleryPlugin from "main";
 import getFileList from "code-block/files";
 import getSettings, { Settings } from "code-block/settings";
+
+interface WithKeyProps {
+  key?: React.Key;
+}
+
+type CardProps = React.HTMLAttributes<HTMLDivElement> & WithKeyProps;
+
+const Card = (props: PropsWithChildren<CardProps>) => {
+  return (
+    <div {...props} className="note-card">
+      {props.children}
+    </div>
+  );
+};
 
 const View = ({ app, files }: { app: App; files: TFile[] }) => {
   const breakpointColumnsObj = {
@@ -34,17 +48,17 @@ const View = ({ app, files }: { app: App; files: TFile[] }) => {
         {files.map(file => {
           if (file.extension === "md") {
             return (
-              <div key={file.name} className="note-card">
+              <Card key={file.name}>
                 <div className="inline-title">{file.basename}</div>
                 <hr />
                 <div className="card-content"></div>
-              </div>
+              </Card>
             );
           } else {
             return (
-              <div key={file.name}>
+              <Card key={file.name}>
                 <img src={app.vault.adapter.getResourcePath(file.path)} />
-              </div>
+              </Card>
             );
           }
         })}
