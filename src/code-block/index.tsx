@@ -4,7 +4,7 @@ import {
   MarkdownRenderChild,
   TFile,
 } from "obsidian";
-import { PropsWithChildren, StrictMode } from "react";
+import React, { PropsWithChildren, StrictMode } from "react";
 import { createRoot, Root } from "react-dom/client";
 import Masonry from "masonry";
 
@@ -17,6 +17,16 @@ interface WithKeyProps {
 }
 
 type CardProps = React.HTMLAttributes<HTMLDivElement> & WithKeyProps;
+
+async function allFilesContents(app: App): Promise<string[]> {
+  const { vault } = app;
+
+  const fileContents: string[] = await Promise.all(
+    vault.getMarkdownFiles().map(file => vault.cachedRead(file)),
+  );
+
+  return fileContents;
+}
 
 const Card = (props: PropsWithChildren<CardProps>) => {
   return (
@@ -38,6 +48,15 @@ const View = ({ app, files }: { app: App; files: TFile[] }) => {
     700: 3,
     400: 2,
   };
+
+  React.useEffect(() => {
+    const f = async () => {
+      const files = await allFilesContents(app);
+      console.log({ files });
+    };
+    f();
+  }, [app]);
+
   return (
     <div>
       <Masonry
