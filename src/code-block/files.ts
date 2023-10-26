@@ -6,7 +6,7 @@ type WVault = Vault & {
   getAbstractFileByPathInsensitive?: null | ((path: string) => TAbstractFile | null);
 };
 
-const VALID_EXTENSIONS = ["jpeg", "jpg", "gif", "png", "webp", "tiff", "tif"];
+const VALID_EXTENSIONS = ["jpeg", "jpg", "gif", "png", "webp", "tiff", "tif", "md"];
 
 const getChildren = (children: TAbstractFile[], recursive = false) =>
   children.reduce((acc, v) => {

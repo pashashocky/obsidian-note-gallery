@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "baseUrl": "./",
+    "baseUrl": "src",
     "target": "ES6",
     "lib": ["ES2021", "DOM", "DOM.Iterable"],
     "module": "ESNext",

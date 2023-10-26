@@ -6,11 +6,11 @@ import {
 } from "obsidian";
 import { StrictMode } from "react";
 import { createRoot, Root } from "react-dom/client";
-import Masonry from "../masonry";
+import Masonry from "masonry";
 
-import NoteGalleryPlugin from "../main";
-import getFileList from "./files";
-import getSettings, { Settings } from "./settings";
+import NoteGalleryPlugin from "main";
+import getFileList from "code-block/files";
+import getSettings, { Settings } from "code-block/settings";
 
 const View = ({ app, files }: { app: App; files: TFile[] }) => {
   const breakpointColumnsObj = {
@@ -28,15 +28,25 @@ const View = ({ app, files }: { app: App; files: TFile[] }) => {
     <div>
       <Masonry
         breakpointCols={breakpointColumnsObj}
-        className="my-masonry-grid"
-        columnClassName="my-masonry-grid_column"
+        className="masonry-grid"
+        columnClassName="masonry-grid_column"
       >
-        {files.map(function (file) {
-          return (
-            <div key={file.name}>
-              <img src={app.vault.adapter.getResourcePath(file.path)} />
-            </div>
-          );
+        {files.map(file => {
+          if (file.extension === "md") {
+            return (
+              <div key={file.name} className="note-card">
+                <div className="inline-title">{file.basename}</div>
+                <hr />
+                <div className="card-content"></div>
+              </div>
+            );
+          } else {
+            return (
+              <div key={file.name}>
+                <img src={app.vault.adapter.getResourcePath(file.path)} />
+              </div>
+            );
+          }
         })}
       </Masonry>
     </div>
