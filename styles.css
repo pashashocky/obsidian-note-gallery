@@ -32,7 +32,6 @@
 
 /* Style your items */
 .masonry-grid_column > div {
-  line-height: 0;
   margin-bottom: var(--gutter-size);
 }
 
@@ -44,10 +43,12 @@
 }
 
 .note-card {
+  line-height: normal;
   max-height: 330px;
   padding: 10px;
   border-radius: 5px;
   border: 1px solid var(--note-card-border-color);
+  overflow: hidden;
 }
 
 .note-card hr {
@@ -63,4 +64,8 @@
 
 .note-card .card-content {
   min-height: 20px;
+}
+
+.note-card > img {
+  border-radius: 5px !important;
 }

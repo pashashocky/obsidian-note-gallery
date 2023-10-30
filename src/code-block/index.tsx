@@ -18,21 +18,38 @@ interface WithKeyProps {
 
 type CardProps = React.HTMLAttributes<HTMLDivElement> & WithKeyProps;
 
-async function allFilesContents(app: App): Promise<string[]> {
-  const { vault } = app;
-
-  const fileContents: string[] = await Promise.all(
-    vault.getMarkdownFiles().map(file => vault.cachedRead(file)),
-  );
-
-  return fileContents;
-}
-
 const Card = (props: PropsWithChildren<CardProps>) => {
   return (
     <div {...props} className="note-card">
       {props.children}
     </div>
+  );
+};
+
+interface CardMarkdownContentProps {
+  file: TFile;
+  app: App;
+}
+
+const CardMarkdownContent = (props: CardMarkdownContentProps) => {
+  const { app, file } = props;
+  const { vault } = app;
+  const [content, setContent] = React.useState("");
+
+  React.useEffect(() => {
+    const f = async () => {
+      const c = await vault.cachedRead(file);
+      setContent(c);
+    };
+    f();
+  }, [vault, file]);
+
+  return (
+    <React.Fragment>
+      <div className="inline-title">{file.basename}</div>
+      <hr />
+      <div className="card-content">{content}</div>
+    </React.Fragment>
   );
 };
 
@@ -49,14 +66,6 @@ const View = ({ app, files }: { app: App; files: TFile[] }) => {
     400: 2,
   };
 
-  React.useEffect(() => {
-    const f = async () => {
-      const files = await allFilesContents(app);
-      console.log({ files });
-    };
-    f();
-  }, [app]);
-
   return (
     <div>
       <Masonry
@@ -68,9 +77,7 @@ const View = ({ app, files }: { app: App; files: TFile[] }) => {
           if (file.extension === "md") {
             return (
               <Card key={file.name}>
-                <div className="inline-title">{file.basename}</div>
-                <hr />
-                <div className="card-content"></div>
+                <CardMarkdownContent app={app} file={file} />
               </Card>
             );
           } else {
