@@ -8,6 +8,7 @@
     "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
     "prettier": "prettier --write 'src/**/*.+(ts|tsx|json|html|css)' 'styles.css'",
     "eslint": "eslint . --ext .ts,.tsx --fix",
+    "check-format": "npx prettier --check src",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "version": "node version-bump.mjs && git add manifest.json versions.json package.json"
   },
@@ -17,13 +18,7 @@
     "type": "git",
     "url": "git+https://github.com/pashashocky/obsidian-note-gallery.git"
   },
-  "keywords": [
-    "note",
-    "gallery",
-    "plugin",
-    "obsidian",
-    "masonry"
-  ],
+  "keywords": ["note", "gallery", "plugin", "obsidian", "masonry"],
   "license": "GPL-3.0+",
   "devDependencies": {
     "@codemirror/state": "^6.0.0",
