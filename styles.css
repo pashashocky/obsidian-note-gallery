@@ -3,7 +3,7 @@
 /* ========================================================================= */
 
 :root {
-  --gutter-size: 8px;
+  --gutter-size: 12px;
 }
 
 :root body.theme-light {
@@ -25,6 +25,7 @@
   margin-left: calc(var(--gutter-size) * -1); /* gutter size offset */
   width: auto;
 }
+
 .masonry-grid_column {
   padding-left: var(--gutter-size); /* gutter size */
   background-clip: padding-box;
@@ -49,11 +50,12 @@
   border-radius: 5px;
   border: 1px solid var(--note-card-border-color);
   overflow: hidden;
+  cursor: pointer;
 }
 
 .note-card hr {
   border-top: 1px solid var(--hr-color);
-  margin: 0;
+  margin-bottom: 0.4rem !important;
 }
 
 .note-card .inline-title {
@@ -64,8 +66,34 @@
 
 .note-card .card-content {
   min-height: 20px;
+  font-size: 4pt;
 }
 
 .note-card > img {
   border-radius: 5px !important;
+}
+
+/* Styling of external elements */
+
+.note-card .callout {
+  min-height: unset;
+}
+
+.note-card .callout-title {
+  min-height: unset !important;
+}
+
+.note-card .callout-content {
+  padding-left: 2px !important;
+  padding-right: 2px !important;
+}
+
+.note-card svg.svg-icon {
+  height: 8px;
+  width: 8px;
+}
+
+.note-card .video-wrapper {
+  min-width: unset;
+  min-height: unset;
 }

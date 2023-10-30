@@ -6,9 +6,11 @@ import {
 } from "obsidian";
 import React, { PropsWithChildren, StrictMode } from "react";
 import { createRoot, Root } from "react-dom/client";
-import Masonry from "masonry";
 
+import Masonry from "masonry";
 import NoteGalleryPlugin from "main";
+import AppMount from "ui/app-mount-provider";
+import { useRenderMarkdown, appendOrReplaceFirstChild } from "ui/render-utils";
 import getFileList from "code-block/files";
 import getSettings, { Settings } from "code-block/settings";
 
@@ -35,6 +37,7 @@ const CardMarkdownContent = (props: CardMarkdownContentProps) => {
   const { app, file } = props;
   const { vault } = app;
   const [content, setContent] = React.useState("");
+  const { containerRef, renderRef } = useRenderMarkdown(content);
 
   React.useEffect(() => {
     const f = async () => {
@@ -48,7 +51,18 @@ const CardMarkdownContent = (props: CardMarkdownContentProps) => {
     <React.Fragment>
       <div className="inline-title">{file.basename}</div>
       <hr />
-      <div className="card-content">{content}</div>
+      <div className="card-content">
+        <div
+          ref={node => {
+            if (content !== "") {
+              containerRef.current = node;
+              appendOrReplaceFirstChild(node, renderRef.current);
+            }
+          }}
+        >
+          {content === "" && content}
+        </div>
+      </div>
     </React.Fragment>
   );
 };
@@ -115,7 +129,9 @@ export default class CodeBlockNoteGallery extends MarkdownRenderChild {
     this.root = createRoot(this.containerEl);
     this.root.render(
       <StrictMode>
-        <View app={this.app} files={this.files} />
+        <AppMount app={this.app} component={this} sourcePath={this.ctx.sourcePath}>
+          <View app={this.app} files={this.files} />
+        </AppMount>
       </StrictMode>,
     );
   }

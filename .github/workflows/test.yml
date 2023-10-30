@@ -1,0 +1,47 @@
+name: Build and Lint
+permissions:
+    contents: write
+on: push
+jobs:
+    lint:
+        runs-on: ubuntu-latest
+        name: Lint
+        steps:
+            - uses: actions/checkout@v4
+            - name: Use Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: "19.x"
+            - name: Build
+              id: build
+              run: |
+                  npm install
+                  npm run lint
+    format:
+        runs-on: ubuntu-latest
+        name: Format
+        steps:
+            - uses: actions/checkout@v4
+            - name: Use Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: "19.x"
+            - name: Build
+              id: build
+              run: |
+                  npm install
+                  npm run check-format
+    build:
+        runs-on: ubuntu-latest
+        name: Build
+        steps:
+            - uses: actions/checkout@v4
+            - name: Use Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: "19.x"
+            - name: Build
+              id: build
+              run: |
+                  npm install
+                  npm run build
