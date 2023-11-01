@@ -4,7 +4,13 @@ import {
   MarkdownRenderChild,
   TFile,
 } from "obsidian";
-import React, { PropsWithChildren, StrictMode } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  PropsWithChildren,
+  StrictMode,
+} from "react";
 import { createRoot, Root } from "react-dom/client";
 
 import Masonry from "masonry";
@@ -38,6 +44,8 @@ const CardMarkdownContent = (props: CardMarkdownContentProps) => {
   const { vault } = app;
   const [content, setContent] = React.useState("");
   const { containerRef, renderRef } = useRenderMarkdown(content);
+  const [inView, setInView] = useState(false);
+  const placeholderRef = useRef<HTMLDivElement | null>(null);
 
   React.useEffect(() => {
     const f = async () => {
@@ -47,21 +55,46 @@ const CardMarkdownContent = (props: CardMarkdownContentProps) => {
     f();
   }, [vault, file]);
 
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries, obs) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          setInView(true);
+          obs.disconnect();
+        }
+      }
+    }, {});
+    observer.observe(placeholderRef.current);
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  // return inView ? (
+  //   <img {...props} alt={props.alt || ""} />
+  // ) : (
+  //   <img {...props} ref={placeholderRef} src={placeholder} alt={props.alt || ""} />
+  // );
+
   return (
     <React.Fragment>
       <div className="inline-title">{file.basename}</div>
       <hr />
       <div className="card-content">
-        <div
-          ref={node => {
-            if (content !== "") {
-              containerRef.current = node;
-              appendOrReplaceFirstChild(node, renderRef.current);
-            }
-          }}
-        >
-          {content === "" && content}
-        </div>
+        {inView ? (
+          <div
+            ref={node => {
+              if (content !== "") {
+                containerRef.current = node;
+                appendOrReplaceFirstChild(node, renderRef.current);
+              }
+            }}
+          >
+            {content === "" && content}
+          </div>
+        ) : (
+          <div ref={placeholderRef}>test</div>
+        )}
       </div>
     </React.Fragment>
   );
