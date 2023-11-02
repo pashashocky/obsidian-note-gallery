@@ -4,13 +4,7 @@ import {
   MarkdownRenderChild,
   TFile,
 } from "obsidian";
-import React, {
-  useState,
-  useEffect,
-  useRef,
-  PropsWithChildren,
-  StrictMode,
-} from "react";
+import React, { useState, useRef, PropsWithChildren, StrictMode } from "react";
 import { createRoot, Root } from "react-dom/client";
 
 import Masonry from "masonry";
@@ -19,6 +13,7 @@ import AppMount from "ui/app-mount-provider";
 import { useRenderMarkdown, appendOrReplaceFirstChild } from "ui/render-utils";
 import getFileList from "code-block/files";
 import getSettings, { Settings } from "code-block/settings";
+import { useIntersectionObserver } from "ui/intersection-observer";
 
 interface WithKeyProps {
   key?: React.Key;
@@ -42,46 +37,30 @@ interface CardMarkdownContentProps {
 const CardMarkdownContent = (props: CardMarkdownContentProps) => {
   const { app, file } = props;
   const { vault } = app;
-  const [content, setContent] = React.useState("");
+  const [content, setContent] = useState("");
   const { containerRef, renderRef } = useRenderMarkdown(content);
-  const [inView, setInView] = useState(false);
-  const placeholderRef = useRef<HTMLDivElement | null>(null);
+
+  const ref = useRef<HTMLDivElement | null>(null);
+  const entry = useIntersectionObserver(ref, { freezeOnceVisible: true });
+  const isVisible = !!entry?.isIntersecting;
 
   React.useEffect(() => {
     const f = async () => {
-      const c = await vault.cachedRead(file);
-      setContent(c);
+      vault.cachedRead(file).then(c => setContent(c));
     };
-    f();
-  }, [vault, file]);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver((entries, obs) => {
-      for (const entry of entries) {
-        if (entry.isIntersecting) {
-          setInView(true);
-          obs.disconnect();
-        }
-      }
-    }, {});
-    observer.observe(placeholderRef.current);
-    return () => {
-      observer.disconnect();
-    };
-  }, []);
-
-  // return inView ? (
-  //   <img {...props} alt={props.alt || ""} />
-  // ) : (
-  //   <img {...props} ref={placeholderRef} src={placeholder} alt={props.alt || ""} />
-  // );
+    if (isVisible) {
+      f();
+    }
+  }, [vault, file, isVisible]);
 
   return (
     <React.Fragment>
-      <div className="inline-title">{file.basename}</div>
+      <div className="inline-title" ref={ref}>
+        {file.basename}
+      </div>
       <hr />
       <div className="card-content">
-        {inView ? (
+        {isVisible && (
           <div
             ref={node => {
               if (content !== "") {
@@ -92,8 +71,6 @@ const CardMarkdownContent = (props: CardMarkdownContentProps) => {
           >
             {content === "" && content}
           </div>
-        ) : (
-          <div ref={placeholderRef}>test</div>
         )}
       </div>
     </React.Fragment>
