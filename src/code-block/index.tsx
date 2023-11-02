@@ -45,12 +45,12 @@ const CardMarkdownContent = (props: CardMarkdownContentProps) => {
   const isVisible = !!entry?.isIntersecting;
 
   React.useEffect(() => {
-    const f = async () => {
-      vault.cachedRead(file).then(c => setContent(c));
-    };
-    if (isVisible) {
-      f();
-    }
+    (async () => {
+      if (isVisible) {
+        const c = await vault.cachedRead(file);
+        setContent(c);
+      }
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isVisible]);
 
