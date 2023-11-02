@@ -34,6 +34,28 @@ interface CardMarkdownContentProps {
   app: App;
 }
 
+interface CardMarkdownContentRendererProps {
+  content: string;
+  containerRef: React.MutableRefObject<HTMLElement | null>;
+  renderRef: React.MutableRefObject<HTMLElement | null>;
+}
+
+const CardMarkdownContentRenderer = (props: CardMarkdownContentRendererProps) => {
+  const { content, containerRef, renderRef } = props;
+  return (
+    <div
+      ref={node => {
+        if (content !== "") {
+          containerRef.current = node;
+          appendOrReplaceFirstChild(node, renderRef.current);
+        }
+      }}
+    >
+      {content === "" && content}
+    </div>
+  );
+};
+
 const CardMarkdownContent = (props: CardMarkdownContentProps) => {
   const { app, file } = props;
   const { vault } = app;
@@ -62,16 +84,11 @@ const CardMarkdownContent = (props: CardMarkdownContentProps) => {
       <hr />
       <div className="card-content">
         {isVisible && (
-          <div
-            ref={node => {
-              if (content !== "") {
-                containerRef.current = node;
-                appendOrReplaceFirstChild(node, renderRef.current);
-              }
-            }}
-          >
-            {content === "" && content}
-          </div>
+          <CardMarkdownContentRenderer
+            content={content}
+            containerRef={containerRef}
+            renderRef={renderRef}
+          />
         )}
       </div>
     </React.Fragment>
