@@ -51,7 +51,8 @@ const CardMarkdownContent = (props: CardMarkdownContentProps) => {
     if (isVisible) {
       f();
     }
-  }, [vault, file, isVisible]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isVisible]);
 
   return (
     <React.Fragment>
