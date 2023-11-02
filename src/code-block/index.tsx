@@ -74,7 +74,7 @@ const CardMarkdownContent = (props: CardMarkdownContentProps) => {
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isVisible]);
+  }, [isVisible, file.path]);
 
   return (
     <React.Fragment>

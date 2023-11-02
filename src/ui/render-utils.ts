@@ -52,7 +52,7 @@ export const useRenderMarkdown = (markdown: string) => {
   const { component, sourcePath } = useAppMount();
 
   React.useEffect(() => {
-    async function updateContainerRef() {
+    (async () => {
       const el = await renderMarkdown(app, sourcePath, component, markdown);
 
       if (el) {
@@ -62,9 +62,7 @@ export const useRenderMarkdown = (markdown: string) => {
         //If the container ref is not null, append the element to the container
         if (containerRef.current) appendOrReplaceFirstChild(containerRef.current, el);
       }
-    }
-
-    updateContainerRef();
+    })();
   }, [app, markdown, sourcePath, component]);
 
   return {
