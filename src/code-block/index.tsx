@@ -4,7 +4,13 @@ import {
   MarkdownRenderChild,
   TFile,
 } from "obsidian";
-import React, { useState, useRef, PropsWithChildren, StrictMode } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  PropsWithChildren,
+  StrictMode,
+} from "react";
 import { createRoot, Root } from "react-dom/client";
 
 import Masonry from "masonry";
@@ -77,14 +83,15 @@ const CardMarkdownContent = (props: CardMarkdownContentProps) => {
   });
   const isVisible = !!entry?.isIntersecting;
 
-  React.useEffect(() => {
+  useEffect(() => {
     (async () => {
       if (isVisible) {
         const c = await vault.cachedRead(file);
         setContent(c);
       }
     })();
-  }, [vault, isVisible, file]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isVisible, file]);
 
   return (
     <React.Fragment>

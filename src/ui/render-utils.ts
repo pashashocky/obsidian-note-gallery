@@ -66,7 +66,8 @@ export const useRenderMarkdown = (markdown: string) => {
     })();
 
     setRendered(true);
-  }, [app, markdown, sourcePath, component]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [markdown, sourcePath]);
 
   return {
     containerRef,
