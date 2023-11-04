@@ -67,7 +67,10 @@ const CardMarkdownContent = (props: CardMarkdownContentProps) => {
   const [content, setContent] = useState("");
 
   const ref = useRef<HTMLDivElement | null>(null);
-  const entry = useIntersectionObserver(ref, { freezeOnceVisible: true });
+  const entry = useIntersectionObserver(ref, {
+    rootMargin: "33%",
+    freezeOnceVisible: true,
+  });
   const isVisible = !!entry?.isIntersecting;
 
   React.useEffect(() => {
