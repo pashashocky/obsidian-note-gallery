@@ -40,18 +40,24 @@ interface CardMarkdownContentRendererProps {
 
 const CardMarkdownContentRenderer = (props: CardMarkdownContentRendererProps) => {
   const { content } = props;
-  const { containerRef, renderRef } = useRenderMarkdown(content);
+  const { containerRef, renderRef, rendered } = useRenderMarkdown(content);
   return (
-    <div
-      ref={node => {
-        if (content !== "") {
-          containerRef.current = node;
-          appendOrReplaceFirstChild(node, renderRef.current);
-        }
-      }}
-    >
-      {content === "" && content}
-    </div>
+    <React.Fragment>
+      {rendered ? (
+        <div
+          ref={node => {
+            if (content !== "" && rendered) {
+              containerRef.current = node;
+              appendOrReplaceFirstChild(node, renderRef.current);
+            }
+          }}
+        >
+          {content === "" && content}
+        </div>
+      ) : (
+        <div />
+      )}
+    </React.Fragment>
   );
 };
 

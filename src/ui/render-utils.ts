@@ -48,6 +48,7 @@ export const useRenderMarkdown = (markdown: string) => {
   const { app } = useAppMount();
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const renderRef = React.useRef<HTMLElement | null>(null);
+  const [rendered, setRendered] = React.useState(false);
 
   const { component, sourcePath } = useAppMount();
 
@@ -63,11 +64,14 @@ export const useRenderMarkdown = (markdown: string) => {
         if (containerRef.current) appendOrReplaceFirstChild(containerRef.current, el);
       }
     })();
+
+    setRendered(true);
   }, [app, markdown, sourcePath, component]);
 
   return {
     containerRef,
     renderRef,
+    rendered,
   };
 };
 
