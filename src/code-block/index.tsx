@@ -84,16 +84,13 @@ const CardMarkdownContent = (props: CardMarkdownContentProps) => {
         setContent(c);
       }
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isVisible, file.path]);
+  }, [vault, isVisible, file]);
 
   return (
     <React.Fragment>
-      <div className="inline-title" ref={ref}>
-        {file.basename}
-      </div>
+      <div className="inline-title">{file.basename}</div>
       <hr />
-      <div className="card-content">
+      <div className="card-content" ref={ref}>
         {isVisible && <CardMarkdownContentRenderer content={content} />}
       </div>
     </React.Fragment>
