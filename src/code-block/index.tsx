@@ -9,8 +9,12 @@ import { createRoot, Root } from "react-dom/client";
 
 import Masonry from "masonry";
 import NoteGalleryPlugin from "main";
-import AppMount from "ui/app-mount-provider";
-import { useRenderMarkdown, appendOrReplaceFirstChild } from "ui/render-utils";
+import AppMount, { useAppMount } from "ui/app-mount-provider";
+import {
+  useRenderMarkdown,
+  appendOrReplaceFirstChild,
+  getResourcePath,
+} from "ui/render-utils";
 import getFileList from "code-block/files";
 import getSettings, { Settings } from "code-block/settings";
 import { useIntersectionObserver } from "ui/intersection-observer";
@@ -31,7 +35,6 @@ const Card = (props: PropsWithChildren<CardProps>) => {
 
 interface CardMarkdownContentProps {
   file: TFile;
-  app: App;
 }
 
 interface CardMarkdownContentRendererProps {
@@ -62,7 +65,8 @@ const CardMarkdownContentRenderer = (props: CardMarkdownContentRendererProps) =>
 };
 
 const CardMarkdownContent = (props: CardMarkdownContentProps) => {
-  const { app, file } = props;
+  const { app } = useAppMount();
+  const { file } = props;
   const { vault } = app;
   const [content, setContent] = useState("");
 
@@ -96,7 +100,8 @@ const CardMarkdownContent = (props: CardMarkdownContentProps) => {
   );
 };
 
-const View = ({ app, files }: { app: App; files: TFile[] }) => {
+const View = ({ files }: { files: TFile[] }) => {
+  const { app } = useAppMount();
   const breakpointColumnsObj = {
     default: 10,
     3100: 9,
@@ -120,13 +125,13 @@ const View = ({ app, files }: { app: App; files: TFile[] }) => {
           if (file.extension === "md") {
             return (
               <Card key={file.name}>
-                <CardMarkdownContent app={app} file={file} />
+                <CardMarkdownContent file={file} />
               </Card>
             );
           } else {
             return (
               <Card key={file.name}>
-                <img src={app.vault.adapter.getResourcePath(file.path)} />
+                <img src={getResourcePath(app, file.path)} />
               </Card>
             );
           }
@@ -159,7 +164,7 @@ export default class CodeBlockNoteGallery extends MarkdownRenderChild {
     this.root.render(
       <StrictMode>
         <AppMount app={this.app} component={this} sourcePath={this.ctx.sourcePath}>
-          <View app={this.app} files={this.files} />
+          <View files={this.files} />
         </AppMount>
       </StrictMode>,
     );
