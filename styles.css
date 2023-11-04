@@ -4,6 +4,7 @@
 
 :root {
   --gutter-size: 12px;
+  --note-card-font-size: 4pt;
 }
 
 :root body.theme-light {
@@ -68,7 +69,7 @@
 
 .note-card .card-content {
   min-height: 20px;
-  font-size: 4pt;
+  font-size: var(--note-card-font-size);
 }
 
 .note-card > img {
@@ -76,6 +77,10 @@
 }
 
 /* Styling of external elements */
+
+.note-card .markdown-preview-view {
+  font-size: var(--note-card-font-size);
+}
 
 .note-card .callout {
   min-height: unset;
@@ -96,6 +101,11 @@
 }
 
 .note-card .video-wrapper {
+  min-width: unset;
+  min-height: unset;
+}
+
+.note-card .embed-container {
   min-width: unset;
   min-height: unset;
 }
