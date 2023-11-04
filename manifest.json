@@ -1,7 +1,7 @@
 {
 	"id": "obsidian-note-gallery",
 	"name": "Note Gallery",
-	"version": "0.0.11",
+	"version": "0.0.12",
 	"minAppVersion": "1.2.0",
 	"description": "A masonry note gallery for Obsidian.",
 	"author": "Pash Shocky",
