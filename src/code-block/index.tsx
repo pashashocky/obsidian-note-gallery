@@ -36,12 +36,11 @@ interface CardMarkdownContentProps {
 
 interface CardMarkdownContentRendererProps {
   content: string;
-  containerRef: React.MutableRefObject<HTMLElement | null>;
-  renderRef: React.MutableRefObject<HTMLElement | null>;
 }
 
 const CardMarkdownContentRenderer = (props: CardMarkdownContentRendererProps) => {
-  const { content, containerRef, renderRef } = props;
+  const { content } = props;
+  const { containerRef, renderRef } = useRenderMarkdown(content);
   return (
     <div
       ref={node => {
@@ -60,7 +59,6 @@ const CardMarkdownContent = (props: CardMarkdownContentProps) => {
   const { app, file } = props;
   const { vault } = app;
   const [content, setContent] = useState("");
-  const { containerRef, renderRef } = useRenderMarkdown(content);
 
   const ref = useRef<HTMLDivElement | null>(null);
   const entry = useIntersectionObserver(ref, { freezeOnceVisible: true });
@@ -83,13 +81,7 @@ const CardMarkdownContent = (props: CardMarkdownContentProps) => {
       </div>
       <hr />
       <div className="card-content">
-        {isVisible && (
-          <CardMarkdownContentRenderer
-            content={content}
-            containerRef={containerRef}
-            renderRef={renderRef}
-          />
-        )}
+        {isVisible && <CardMarkdownContentRenderer content={content} />}
       </div>
     </React.Fragment>
   );
