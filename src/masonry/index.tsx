@@ -113,6 +113,10 @@ class Masonry extends React.Component<MasonryPropsType, { columnCount: number }>
     const windowWidth = (this.ref.current && this.ref.current.offsetWidth) || Infinity;
     let { breakpointCols } = this.props;
 
+    if (windowWidth === Infinity) {
+      return;
+    }
+
     // Allow passing a single number to `breakpointCols` instead of an object
     if (typeof breakpointCols === "number") {
       breakpointCols = {
