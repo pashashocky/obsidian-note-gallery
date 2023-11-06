@@ -29,11 +29,29 @@ interface WithKeyProps {
   key?: React.Key;
 }
 
-type CardProps = React.HTMLAttributes<HTMLDivElement> & WithKeyProps;
+interface CardPropsI {
+  file: TFile;
+}
+
+type CardProps = CardPropsI & React.HTMLAttributes<HTMLDivElement> & WithKeyProps;
 
 const Card = (props: PropsWithChildren<CardProps>) => {
+  const { file, ...rest } = props;
+  const { app, sourcePath } = useAppMount();
   return (
-    <div {...props} className="note-card">
+    <div
+      {...rest}
+      className="note-card"
+      onClick={event => {
+        const newLeaf =
+          event.altKey && (event.ctrlKey || event.metaKey)
+            ? "split"
+            : event.ctrlKey || event.metaKey
+            ? "tab"
+            : false;
+        app.workspace.openLinkText(file.basename, sourcePath, newLeaf);
+      }}
+    >
       {props.children}
     </div>
   );
@@ -54,6 +72,7 @@ const CardMarkdownContentRenderer = (props: CardMarkdownContentRendererProps) =>
     <React.Fragment>
       {rendered ? (
         <div
+          className="card-content-container"
           ref={node => {
             if (content !== "" && rendered) {
               containerRef.current = node;
@@ -98,6 +117,7 @@ const CardMarkdownContent = (props: CardMarkdownContentProps) => {
       <div className="inline-title">{file.basename}</div>
       <hr />
       <div className="card-content" ref={ref}>
+        <div className="card-content-wall" />
         {isVisible && <CardMarkdownContentRenderer content={content} />}
       </div>
     </React.Fragment>
@@ -128,13 +148,13 @@ const View = ({ files }: { files: TFile[] }) => {
         {files.map(file => {
           if (file.extension === "md") {
             return (
-              <Card key={file.name}>
+              <Card key={file.name} file={file}>
                 <CardMarkdownContent file={file} />
               </Card>
             );
           } else {
             return (
-              <Card key={file.name}>
+              <Card key={file.name} file={file}>
                 <img src={getResourcePath(app, file.path)} />
               </Card>
             );

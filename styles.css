@@ -54,6 +54,10 @@
   cursor: pointer;
 }
 
+.note-card:hover {
+  border: 1px solid var(--interactive-accent-hover);
+}
+
 .note-card hr {
   border-top: 1px solid var(--hr-color);
   margin-top: 0.4rem !important;
@@ -68,8 +72,18 @@
 }
 
 .note-card .card-content {
+  position: relative;
   min-height: 20px;
   font-size: var(--note-card-font-size);
+}
+
+.note-card .card-content-wall {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  z-index: 10;
 }
 
 .note-card > img {
