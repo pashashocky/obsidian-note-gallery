@@ -1,5 +1,5 @@
 import { App, MarkdownPostProcessorContext, normalizePath, parseYaml } from "obsidian";
-import renderError from "./errors";
+import renderError from "~/code-block/errors";
 
 export interface Settings {
   path: string;

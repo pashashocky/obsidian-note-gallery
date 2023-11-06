@@ -13,18 +13,19 @@ import React, {
   MouseEvent,
 } from "react";
 import { createRoot, Root } from "react-dom/client";
+import InfiniteScroll from "react-infinite-scroller";
 
-import Masonry from "masonry";
-import NoteGalleryPlugin from "main";
-import AppMount, { useAppMount } from "ui/app-mount-provider";
+import Masonry from "~/masonry";
+import NoteGalleryPlugin from "~/main";
+import AppMount, { useAppMount } from "~/ui/app-mount-provider";
 import {
   useRenderMarkdown,
   appendOrReplaceFirstChild,
   getResourcePath,
-} from "ui/render-utils";
-import getFileList from "code-block/files";
-import getSettings, { Settings } from "code-block/settings";
-import { useIntersectionObserver } from "ui/intersection-observer";
+} from "~/ui/render-utils";
+import getFileList from "~/code-block/files";
+import getSettings, { Settings } from "~/code-block/settings";
+import { useIntersectionObserver } from "~/ui/intersection-observer";
 
 interface WithKeyProps {
   key?: React.Key;
@@ -124,6 +125,9 @@ const CardMarkdownContent = (props: CardMarkdownContentProps) => {
 
 const View = ({ files }: { files: TFile[] }) => {
   const { app } = useAppMount();
+  const itemsPerPage = 300;
+  const [hasMore, setHasMore] = useState(true);
+  const [records, setRecords] = useState(itemsPerPage);
   const breakpointColumnsObj = {
     default: 10,
     3100: 9,
@@ -136,29 +140,53 @@ const View = ({ files }: { files: TFile[] }) => {
     400: 2,
   };
 
+  const loadMore = () => {
+    if (records === files.length) {
+      setHasMore(false);
+    } else {
+      setTimeout(() => {
+        setRecords(records + itemsPerPage);
+      }, 1000);
+    }
+  };
+
+  const showItems = (files: TFile[]) => {
+    const items = [];
+    for (let i = 0; i < records; i++) {
+      const file = files[i];
+      if (file && file.extension === "md") {
+        items.push(
+          <Card key={file.name} file={file}>
+            <CardMarkdownContent file={file} />
+          </Card>,
+        );
+      } else if (file) {
+        items.push(
+          <Card key={file.name} file={file}>
+            <img src={getResourcePath(app, file.path)} />
+          </Card>,
+        );
+      }
+    }
+    return items;
+  };
+
   return (
     <div>
-      <Masonry
-        breakpointCols={breakpointColumnsObj}
-        className="masonry-grid"
-        columnClassName="masonry-grid_column"
+      <InfiniteScroll
+        pageStart={0}
+        loadMore={loadMore}
+        hasMore={hasMore}
+        useWindow={false}
       >
-        {files.map(file => {
-          if (file.extension === "md") {
-            return (
-              <Card key={file.name} file={file}>
-                <CardMarkdownContent file={file} />
-              </Card>
-            );
-          } else {
-            return (
-              <Card key={file.name} file={file}>
-                <img src={getResourcePath(app, file.path)} />
-              </Card>
-            );
-          }
-        })}
-      </Masonry>
+        <Masonry
+          breakpointCols={breakpointColumnsObj}
+          className="masonry-grid"
+          columnClassName="masonry-grid_column"
+        >
+          {showItems(files)}
+        </Masonry>
+      </InfiniteScroll>
     </div>
   );
 };

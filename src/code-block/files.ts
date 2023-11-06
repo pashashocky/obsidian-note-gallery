@@ -1,6 +1,6 @@
 import { App, TFolder, TFile, FileStats, TAbstractFile, Vault } from "obsidian";
-import { Settings } from "./settings";
-import renderError from "./errors";
+import { Settings } from "~/code-block/settings";
+import renderError from "~/code-block/errors";
 
 type WVault = Vault & {
   getAbstractFileByPathInsensitive?: null | ((path: string) => TAbstractFile | null);

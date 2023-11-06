@@ -1,6 +1,6 @@
 import React from "react";
 
-import { useAppMount } from "ui/app-mount-provider";
+import { useAppMount } from "~/ui/app-mount-provider";
 import {
   App,
   MarkdownRenderer,
