@@ -92,6 +92,10 @@
 
 /* Styling of external elements */
 
+.cm-embed-block:has(> div.block-language-note-gallery):hover {
+  box-shadow: unset !important;
+}
+
 .note-card .markdown-preview-view {
   font-size: var(--note-card-font-size);
 }
