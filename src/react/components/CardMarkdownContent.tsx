@@ -21,11 +21,23 @@ export default function CardMarkdownContent(props: CardMarkdownContentProps) {
     freezeOnceVisible: true,
   });
   const isVisible = !!entry?.isIntersecting;
+  const linesToKeep = 30;
 
   useEffect(() => {
     (async () => {
       if (isVisible) {
-        const c = await vault.cachedRead(file);
+        let c = await vault.cachedRead(file);
+
+        // the idea of the below is to trim the content to the first n lines
+        let meta = "";
+        if (c.startsWith("---")) {
+          const i = c.indexOf("---", 3); // second instance
+          meta = c.slice(0, i + 3).trim();
+          c = c.slice(i + 3, c.length).trim();
+        }
+        c = c.split("\n").splice(0, linesToKeep).join("\n");
+        c = [meta, c].join("\n").trim();
+
         setContent(c);
       }
     })();
