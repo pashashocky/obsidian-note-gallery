@@ -4,14 +4,12 @@ import {
   MarkdownRenderChild,
   TFile,
 } from "obsidian";
-import { StrictMode } from "react";
 import { createRoot, Root } from "react-dom/client";
 
 import NoteGalleryPlugin from "~/main";
+import NoteGalleryApp from "~/react";
 import getFileList from "~/code-block/files";
 import getSettings, { Settings } from "~/code-block/settings";
-import AppMount from "~/react/context/app-mount-provider";
-import Gallery from "~/react/components/Gallery";
 
 export default class CodeBlockNoteGallery extends MarkdownRenderChild {
   private root: Root | null;
@@ -34,11 +32,12 @@ export default class CodeBlockNoteGallery extends MarkdownRenderChild {
   async onload() {
     this.root = createRoot(this.containerEl);
     this.root.render(
-      <StrictMode>
-        <AppMount app={this.app} component={this} sourcePath={this.ctx.sourcePath}>
-          <Gallery files={this.files} />
-        </AppMount>
-      </StrictMode>,
+      <NoteGalleryApp
+        app={this.app}
+        component={this}
+        sourcePath={this.ctx.sourcePath}
+        files={this.files}
+      />,
     );
   }
 
