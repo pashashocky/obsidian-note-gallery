@@ -1,13 +1,7 @@
 import React from "react";
 
-import { useAppMount } from "~/ui/app-mount-provider";
-import {
-  App,
-  MarkdownRenderer,
-  Platform,
-  Component,
-  MarkdownRenderChild,
-} from "obsidian";
+import { useAppMount } from "~/react/context/app-mount-provider";
+import { App, MarkdownRenderer, Component, MarkdownRenderChild } from "obsidian";
 
 export const appendOrReplaceFirstChild = (
   container: HTMLElement | null,
@@ -74,10 +68,6 @@ export const useRenderMarkdown = (markdown: string) => {
     renderRef,
     rendered,
   };
-};
-
-export const isOnMobile = () => {
-  return Platform.isMobile;
 };
 
 export const getResourcePath = (app: App, filePath: string) => {
