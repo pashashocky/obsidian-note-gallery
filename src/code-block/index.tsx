@@ -24,7 +24,7 @@ export default class CodeBlockNoteGallery extends MarkdownRenderChild {
   ) {
     super(containerEl);
     this.settings = getSettings(src, app, containerEl, ctx);
-    this.files = getFileList(app, containerEl, this.settings);
+    this.files = getFileList(app, ctx, containerEl, this.settings);
   }
 
   async onload() {

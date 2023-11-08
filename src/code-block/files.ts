@@ -1,4 +1,12 @@
-import { App, TFolder, TFile, FileStats, TAbstractFile, Vault } from "obsidian";
+import {
+  App,
+  TFolder,
+  TFile,
+  FileStats,
+  TAbstractFile,
+  Vault,
+  MarkdownPostProcessorContext,
+} from "obsidian";
 import { Settings } from "~/code-block/settings";
 import renderError from "~/code-block/errors";
 
@@ -27,7 +35,12 @@ const getPath = (app: App, path: string) => {
   return vault.getAbstractFileByPath(path);
 };
 
-const getFileList = (app: App, container: HTMLElement, settings: Settings) => {
+const getFileList = (
+  app: App,
+  ctx: MarkdownPostProcessorContext,
+  container: HTMLElement,
+  settings: Settings,
+) => {
   // retrieve a list of files in the settings.path
   // and if specified by settings.recursive fetch the files
   // in all the subfolders.
@@ -43,6 +56,7 @@ const getFileList = (app: App, container: HTMLElement, settings: Settings) => {
 
   // filter + sort
   files = files
+    .filter(file => file.path !== ctx.sourcePath)
     .filter(file => VALID_EXTENSIONS.includes(file.extension))
     .sort((a: TFile, b: TFile) => {
       const refA =
