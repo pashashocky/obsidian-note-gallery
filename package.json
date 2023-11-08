@@ -1,6 +1,6 @@
 {
   "name": "obsidian-note-gallery",
-  "version": "0.0.21",
+  "version": "0.0.22",
   "description": "A masonry note gallery for Obsidian.",
   "main": "main.js",
   "scripts": {
@@ -18,7 +18,13 @@
     "type": "git",
     "url": "git+https://github.com/pashashocky/obsidian-note-gallery.git"
   },
-  "keywords": ["note", "gallery", "plugin", "obsidian", "masonry"],
+  "keywords": [
+    "note",
+    "gallery",
+    "plugin",
+    "obsidian",
+    "masonry"
+  ],
   "license": "GPL-3.0+",
   "devDependencies": {
     "@codemirror/state": "^6.0.0",
