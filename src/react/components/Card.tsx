@@ -1,19 +1,21 @@
 import { TFile } from "obsidian";
-import { PropsWithChildren, MouseEvent } from "react";
+import React from "preact/compat";
+import { ComponentChildren, Key } from "preact";
 
 import { useAppMount } from "~/react/context/app-mount-provider";
 
 interface WithKeyProps {
-  key?: React.Key;
+  key?: Key;
 }
 
 interface CardPropsI {
   file: TFile;
+  children: ComponentChildren;
 }
 
 type CardProps = CardPropsI & React.HTMLAttributes<HTMLDivElement> & WithKeyProps;
 
-export default function Card(props: PropsWithChildren<CardProps>) {
+export default function Card(props: CardProps) {
   const { file, ...rest } = props;
   const { app, sourcePath } = useAppMount();
   const handleClick = (event: MouseEvent): void => {

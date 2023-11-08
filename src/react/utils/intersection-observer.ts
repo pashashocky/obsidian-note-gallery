@@ -1,4 +1,5 @@
-import { RefObject, useEffect, useState } from "react";
+import { RefObject } from "preact";
+import { useEffect, useState } from "preact/hooks";
 
 interface Args extends IntersectionObserverInit {
   freezeOnceVisible?: boolean;

@@ -4,7 +4,7 @@ import {
   MarkdownRenderChild,
   TFile,
 } from "obsidian";
-import { createRoot, Root } from "react-dom/client";
+import { render } from "preact";
 
 import NoteGalleryPlugin from "~/main";
 import NoteGalleryApp from "~/react";
@@ -12,7 +12,6 @@ import getFileList from "~/code-block/files";
 import getSettings, { Settings } from "~/code-block/settings";
 
 export default class CodeBlockNoteGallery extends MarkdownRenderChild {
-  private root: Root | null;
   private settings: Settings;
   private files: TFile[];
 
@@ -24,24 +23,23 @@ export default class CodeBlockNoteGallery extends MarkdownRenderChild {
     public ctx: MarkdownPostProcessorContext,
   ) {
     super(containerEl);
-    this.root = null;
     this.settings = getSettings(src, app, containerEl, ctx);
     this.files = getFileList(app, containerEl, this.settings);
   }
 
   async onload() {
-    this.root = createRoot(this.containerEl);
-    this.root.render(
+    render(
       <NoteGalleryApp
         app={this.app}
         component={this}
         sourcePath={this.ctx.sourcePath}
         files={this.files}
       />,
+      this.containerEl,
     );
   }
 
   async onunload() {
-    this.root?.unmount();
+    render(null, this.containerEl);
   }
 }

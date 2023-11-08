@@ -1,4 +1,6 @@
-import React from "react";
+import React from "preact/compat";
+import { Component, toChildArray } from "preact";
+import { createRef } from "preact";
 
 /*
  * This comes from https://github.com/paulcollett/react-masonry-css/tree/master
@@ -19,7 +21,7 @@ export interface MasonryProps {
 
 type MasonryPropsType = MasonryProps & React.HTMLProps<HTMLElement>;
 
-class Masonry extends React.Component<MasonryPropsType, { columnCount: number }> {
+class Masonry extends Component<MasonryPropsType, { columnCount: number }> {
   private ref;
   private resizeObserver: ResizeObserver | null;
   private _lastRecalculateAnimationFrame: number;
@@ -62,7 +64,7 @@ class Masonry extends React.Component<MasonryPropsType, { columnCount: number }>
       columnCount = DEFAULT_COLUMNS;
     }
 
-    this.ref = React.createRef<HTMLDivElement>();
+    this.ref = createRef<HTMLDivElement>();
     this.resizeObserver = null;
     this.state = {
       columnCount,
@@ -151,7 +153,7 @@ class Masonry extends React.Component<MasonryPropsType, { columnCount: number }>
     const itemsInColumns = new Array(currentColumnCount);
 
     // Force children to be handled as an array
-    const items = React.Children.toArray(this.props.children);
+    const items = toChildArray(this.props.children);
 
     for (let i = 0; i < items.length; i++) {
       const columnIndex = i % currentColumnCount;

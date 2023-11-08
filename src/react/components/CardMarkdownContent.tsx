@@ -1,5 +1,6 @@
 import { TFile } from "obsidian";
-import React, { useState, useRef, useEffect } from "react";
+import { Fragment } from "preact";
+import { useState, useRef, useEffect } from "preact/hooks";
 
 import CardMarkdownContentRenderer from "~/react/components/CardMarkdownContentRenderer";
 import { useAppMount } from "~/react/context/app-mount-provider";
@@ -45,13 +46,13 @@ export default function CardMarkdownContent(props: CardMarkdownContentProps) {
   }, [isVisible, file]);
 
   return (
-    <React.Fragment>
+    <Fragment>
       <div className="inline-title">{file.basename}</div>
       <hr />
       <div className="card-content" ref={ref}>
         <div className="card-content-wall" />
         {isVisible && <CardMarkdownContentRenderer content={content} />}
       </div>
-    </React.Fragment>
+    </Fragment>
   );
 }

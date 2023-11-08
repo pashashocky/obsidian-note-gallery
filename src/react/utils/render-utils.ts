@@ -1,5 +1,4 @@
-import React from "react";
-
+import { useRef, useState, useEffect } from "preact/hooks";
 import { useAppMount } from "~/react/context/app-mount-provider";
 import { App, MarkdownRenderer, Component, MarkdownRenderChild } from "obsidian";
 
@@ -40,13 +39,13 @@ export const renderMarkdown = async (
 
 export const useRenderMarkdown = (markdown: string) => {
   const { app } = useAppMount();
-  const containerRef = React.useRef<HTMLDivElement | null>(null);
-  const renderRef = React.useRef<HTMLElement | null>(null);
-  const [rendered, setRendered] = React.useState(false);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const renderRef = useRef<HTMLElement | null>(null);
+  const [rendered, setRendered] = useState(false);
 
   const { component, sourcePath } = useAppMount();
 
-  React.useEffect(() => {
+  useEffect(() => {
     (async () => {
       const el = await renderMarkdown(app, sourcePath, component, markdown);
 

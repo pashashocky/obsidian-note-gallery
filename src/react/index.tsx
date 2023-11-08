@@ -1,4 +1,4 @@
-import { StrictMode } from "react";
+import { StrictMode } from "preact/compat";
 
 import AppMount from "~/react/context/app-mount-provider";
 import Gallery from "~/react/components/Gallery";

@@ -1,4 +1,4 @@
-import React from "react";
+import { Fragment } from "preact";
 
 import {
   useRenderMarkdown,
@@ -15,7 +15,7 @@ export default function CardMarkdownContentRenderer(
   const { content } = props;
   const { containerRef, renderRef, rendered } = useRenderMarkdown(content);
   return (
-    <React.Fragment>
+    <Fragment>
       {rendered ? (
         <div
           className="card-content-container"
@@ -31,6 +31,6 @@ export default function CardMarkdownContentRenderer(
       ) : (
         <div />
       )}
-    </React.Fragment>
+    </Fragment>
   );
 }
