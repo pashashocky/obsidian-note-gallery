@@ -10,11 +10,16 @@ interface CardMarkdownContentProps {
   file: TFile;
 }
 
+export interface ContentI {
+  text: string;
+  markdown: string;
+}
+
 export default function CardMarkdownContent(props: CardMarkdownContentProps) {
   const { app } = useAppMount();
   const { file } = props;
   const { vault } = app;
-  const [content, setContent] = useState("");
+  const [content, setContent] = useState<ContentI>({ text: "", markdown: "" });
 
   const ref = useRef<HTMLDivElement | null>(null);
   const entry = useIntersectionObserver(ref, {
@@ -26,24 +31,22 @@ export default function CardMarkdownContent(props: CardMarkdownContentProps) {
 
   useEffect(() => {
     (async () => {
-      if (isVisible) {
-        let c = await vault.cachedRead(file);
+      let c = await vault.cachedRead(file);
 
-        // the idea of the below is to trim the content to the first n lines
-        let meta = "";
-        if (c.startsWith("---")) {
-          const i = c.indexOf("---", 3); // second instance
-          meta = c.slice(0, i + 3).trim();
-          c = c.slice(i + 3, c.length).trim();
-        }
-        c = c.split("\n").splice(0, linesToKeep).join("\n");
-        c = [meta, c].join("\n").trim();
-
-        setContent(c);
+      // the idea of the below is to trim the content to the first n lines
+      let meta = "";
+      if (c.startsWith("---")) {
+        const i = c.indexOf("---", 3); // second instance
+        meta = c.slice(0, i + 3).trim();
+        c = c.slice(i + 3, c.length).trim();
       }
+      const text = c.split("\n").splice(0, linesToKeep).join("\n");
+      c = [meta, text].join("\n").trim();
+
+      setContent({ text, markdown: c });
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isVisible, file]);
+  }, [file]);
 
   return (
     <Fragment>
@@ -51,7 +54,7 @@ export default function CardMarkdownContent(props: CardMarkdownContentProps) {
       <hr />
       <div className="card-content" ref={ref}>
         <div className="card-content-wall" />
-        {isVisible && <CardMarkdownContentRenderer content={content} />}
+        <CardMarkdownContentRenderer content={content} isVisible={isVisible} />
       </div>
     </Fragment>
   );
