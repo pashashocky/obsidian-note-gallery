@@ -55,10 +55,11 @@ export const useRenderMarkdown = (markdown: string) => {
 
         //If the container ref is not null, append the element to the container
         if (containerRef.current) appendOrReplaceFirstChild(containerRef.current, el);
+
+        setRendered(true);
       }
     })();
 
-    setRendered(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [markdown, sourcePath]);
 
