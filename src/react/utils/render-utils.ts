@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "preact/hooks";
+import { useRef, useState, useLayoutEffect } from "preact/hooks";
 import { useAppMount } from "~/react/context/app-mount-provider";
 import { App, MarkdownRenderer, Component, MarkdownRenderChild } from "obsidian";
 
@@ -45,7 +45,7 @@ export const useRenderMarkdown = (markdown: string) => {
 
   const { component, sourcePath } = useAppMount();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     (async () => {
       const el = await renderMarkdown(app, sourcePath, component, markdown);
 
