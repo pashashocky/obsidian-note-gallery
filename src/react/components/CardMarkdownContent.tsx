@@ -31,20 +31,21 @@ export default function CardMarkdownContent(props: CardMarkdownContentProps) {
 
   useEffect(() => {
     (async () => {
-      let c = await vault.cachedRead(file);
+      let markdown = await vault.cachedRead(file);
 
-      // the idea of the below is to trim the content to the first n lines
-      let meta = "";
-      if (c.startsWith("---")) {
-        const i = c.indexOf("---", 3); // second instance
-        meta = c.slice(0, i + 3).trim();
-        c = c.slice(i + 3, c.length).trim();
+      // the idea of the below is to trim the content to the first n linesToKeep
+      let frontmatter = "";
+      if (markdown.startsWith("---")) {
+        const i = markdown.indexOf("---", 3); // second instance
+        frontmatter = markdown.slice(0, i + 3).trim();
+        markdown = markdown.slice(i + 3, markdown.length).trim();
       }
-      const text = c.split("\n").splice(0, linesToKeep).join("\n");
-      c = [meta, text].join("\n").trim();
+      const text = markdown.split("\n").slice(0, linesToKeep).join("\n");
+      markdown = [frontmatter, text].join("\n").trim();
 
-      setContent({ text, markdown: c });
+      setContent({ text, markdown: markdown });
     })();
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [file]);
 

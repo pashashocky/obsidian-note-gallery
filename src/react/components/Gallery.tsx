@@ -20,7 +20,7 @@ export default function Gallery({ files }: { files: TFile[] }) {
     400: 2,
   };
 
-  const showItems = (files: TFile[]) => {
+  const renderFiles = (files: TFile[]) => {
     const items = [];
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
@@ -48,7 +48,7 @@ export default function Gallery({ files }: { files: TFile[] }) {
         className="masonry-grid"
         columnClassName="masonry-grid_column"
       >
-        {showItems(files)}
+        {renderFiles(files)}
       </Masonry>
     </div>
   );

@@ -17,8 +17,7 @@ const DEFAULT_SETTINGS: Settings = {
   sortby: "mtime",
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AnyObject = { [key: string]: any };
+type AnyObject = { [key: string]: AnyObject };
 const lowercaseKeys = (obj: AnyObject, deep = false) =>
   Object.keys(obj).reduce((acc, key) => {
     acc[key.toLowerCase()] =
@@ -43,18 +42,12 @@ const getSettings = (
     settingsSrc = lowercaseKeys(settingsSrc);
   }
 
-  const settings = DEFAULT_SETTINGS;
+  const settings = { ...DEFAULT_SETTINGS, ...settingsSrc };
   if (settingsSrc === null || !settingsSrc.path) {
     const file = app.vault.getAbstractFileByPath(ctx.sourcePath)!.parent!;
     settings.path = file.path;
-  } else {
-    settings.path = settingsSrc.path;
   }
   settings.path = normalizePath(settings.path);
-  settings.limit = settingsSrc?.limit ?? settings.limit;
-  settings.recursive = settingsSrc?.recursive ?? settings.recursive;
-  settings.sort = settingsSrc?.sort ?? settings.sort;
-  settings.sortby = settingsSrc?.sortby ?? settings.sortby;
 
   return settings;
 };
