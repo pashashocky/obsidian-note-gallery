@@ -1,16 +1,20 @@
+![Note Gallery Example](assets/github-header.png)
+
 # Obsidian Note Gallery
 Obsidian Note Gallery is a masonry style note gallery for [Obsidian](https://obsidian.md/).
 
-**Brand new thing in active development...**
+- **This is a brand new plugin and it's in active development...**
+- Please feel free to leave any bugs or feature requests in issues.
 
 # Functionality
 ## Current
-- Currently works as an image gallery and let's you create a masonry image gallery inside a note
-- Has options for sorting, # of results and recursively scanning folders
+- Currently works a note or image gallery and let's you create a masonry gallery inside a note through a use of a code block.
+- Has options for sorting, # of results and recursively scanning folders.
 
 ## WIP
-- Rendering markdown notes as a masonry gallery, similar to "Safari overview mode" or "Craft-like folder view"
-- Showing currently open tabs as a Masonry gallery
+- Rendering markdown notes as a masonry gallery, similar to "Safari overview mode" or "Craft-like folder view".
+  - [ ] Opimizing the loading of markdown cards in various situations in the vault.
+- Showing currently open tabs as a Masonry gallery.
 
 # Alpha Installation
 1. Install BRAT from the Community Plugins in Obsidian
@@ -31,4 +35,3 @@ fontsize: 6pt        # optional: 6pt | NUMBERpt | NUMBERpx
 ~~~~
 ```
 
-- please feel free to leave any bugs or feature requests in issues.
