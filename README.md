@@ -6,6 +6,9 @@ Obsidian Note Gallery is a masonry style note gallery for [Obsidian](https://obs
 - **This is a brand new plugin and it's in active development...**
 - Please feel free to leave any bugs or feature requests in issues.
 
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/pashashocky?style=social)](https://github.com/sponsors/pashashocky)
+[<img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="BuyMeACoffee" width="100">](https://www.buymeacoffee.com/pashashocky)
+
 # Functionality
 ## Current
 - Currently works a note or image gallery and let's you create a masonry gallery inside a note through a use of a code block.
