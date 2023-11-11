@@ -9,7 +9,9 @@ import { getResourcePath } from "~/react/utils/render-utils";
 export default function Gallery({ files }: { files: TFile[] }) {
   const { app } = useAppMount();
   const breakpointColumnsObj = {
-    default: 10,
+    default: 4,
+    100000: 10,
+    3500: 10,
     3100: 9,
     2700: 8,
     2300: 7,
