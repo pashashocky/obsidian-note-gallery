@@ -3,8 +3,10 @@ import { TFile } from "obsidian";
 import Masonry from "~/react/masonry";
 import Card from "~/react/components/Card";
 import CardMarkdownContent from "~/react/components/CardMarkdownContent";
+import Loader from "~/react/components/Loader";
 import { useAppMount } from "~/react/context/app-mount-provider";
 import { getResourcePath } from "~/react/utils/render-utils";
+import { useState } from "preact/hooks";
 
 export default function Gallery({ files }: { files: TFile[] }) {
   const { app } = useAppMount();
@@ -22,9 +24,23 @@ export default function Gallery({ files }: { files: TFile[] }) {
     400: 2,
   };
 
+  const itemsPerPage = 200;
+  const [hasMore, setHasMore] = useState(true);
+  const [numRendered, setNumRendered] = useState(itemsPerPage);
+
+  const loadMore = () => {
+    if (numRendered >= files.length) {
+      setHasMore(false);
+    } else {
+      setTimeout(() => {
+        setNumRendered(numRendered + itemsPerPage);
+      }, 100);
+    }
+  };
+
   const renderFiles = (files: TFile[]) => {
     const items = [];
-    for (let i = 0; i < files.length; i++) {
+    for (let i = 0; i < numRendered; i++) {
       const file = files[i];
       if (file && file.extension === "md") {
         items.push(
@@ -51,6 +67,7 @@ export default function Gallery({ files }: { files: TFile[] }) {
         columnClassName="masonry-grid_column"
       >
         {renderFiles(files)}
+        <Loader hasMore={hasMore} loadMore={loadMore} />
       </Masonry>
     </div>
   );

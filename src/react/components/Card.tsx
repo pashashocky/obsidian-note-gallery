@@ -9,7 +9,7 @@ interface WithKeyProps {
 }
 
 interface CardPropsI {
-  file: TFile;
+  file?: TFile;
   children: ComponentChildren;
 }
 
@@ -25,7 +25,9 @@ export default function Card(props: CardProps) {
         : event.ctrlKey || event.metaKey
         ? "tab"
         : false;
-    app.workspace.openLinkText(file.path, sourcePath, newLeaf);
+    if (file) {
+      app.workspace.openLinkText(file.path, sourcePath, newLeaf);
+    }
   };
   return (
     <div {...rest} className="note-card" onClick={handleClick}>
