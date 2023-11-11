@@ -34,6 +34,7 @@ export default class CodeBlockNoteGallery extends MarkdownRenderChild {
         component={this}
         sourcePath={this.ctx.sourcePath}
         files={this.files}
+        settings={this.settings}
       />,
       this.containerEl,
     );

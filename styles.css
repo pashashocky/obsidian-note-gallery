@@ -4,7 +4,7 @@
 
 :root {
   --gutter-size: 12px;
-  --note-card-font-size: 4pt;
+  /* --note-card-font-size: 4pt; configured in react/index.tsx */
 }
 
 :root body.theme-light {

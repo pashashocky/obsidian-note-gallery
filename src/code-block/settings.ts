@@ -7,6 +7,7 @@ export interface Settings {
   recursive: boolean;
   sort: "asc" | "desc";
   sortby: "name" | "mtime" | "ctime";
+  fontsize: string;
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -15,6 +16,7 @@ const DEFAULT_SETTINGS: Settings = {
   recursive: true,
   sort: "desc",
   sortby: "mtime",
+  fontsize: "6pt",
 };
 
 type AnyObject = { [key: string]: AnyObject };

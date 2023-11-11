@@ -27,6 +27,7 @@ limit: 10            # optional: 0 | any number
 recursive: true      # optional: true | false
 sort: desc           # optional: desc | asc
 sortby: mtime        # optional: mtime | ctime | name
+fontsize: 6pt        # optional: 6pt | NUMBERpt | NUMBERpx
 ~~~~
 ```
 
