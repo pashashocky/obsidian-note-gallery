@@ -5,6 +5,7 @@ import {
   TFile,
 } from "obsidian";
 import { render } from "preact";
+import localforage from "localforage";
 
 import NoteGalleryPlugin from "~/main";
 import NoteGalleryApp from "~/react";
@@ -14,6 +15,7 @@ import getSettings, { Settings } from "~/code-block/settings";
 export default class CodeBlockNoteGallery extends MarkdownRenderChild {
   private settings: Settings;
   private files: TFile[];
+  private cache: typeof localforage;
 
   constructor(
     public plugin: NoteGalleryPlugin,
@@ -25,6 +27,10 @@ export default class CodeBlockNoteGallery extends MarkdownRenderChild {
     super(containerEl);
     this.settings = getSettings(src, app, containerEl, ctx);
     this.files = getFileList(app, ctx, containerEl, this.settings);
+    this.cache = localforage.createInstance({
+      name: `note-gallery`,
+      driver: localforage.INDEXEDDB,
+    });
   }
 
   async onload() {
@@ -35,6 +41,7 @@ export default class CodeBlockNoteGallery extends MarkdownRenderChild {
         sourcePath={this.ctx.sourcePath}
         files={this.files}
         settings={this.settings}
+        cache={this.cache}
       />,
       this.containerEl,
     );

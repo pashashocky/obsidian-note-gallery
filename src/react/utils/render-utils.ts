@@ -1,6 +1,7 @@
 import { useRef, useState, useLayoutEffect } from "preact/hooks";
 import { useAppMount } from "~/react/context/app-mount-provider";
-import { App, MarkdownRenderer, Component, MarkdownRenderChild } from "obsidian";
+import { App, MarkdownRenderer, Component, MarkdownRenderChild, TFile } from "obsidian";
+import localforage from "localforage";
 
 export const appendOrReplaceFirstChild = (
   container: HTMLElement | null,
@@ -37,8 +38,28 @@ export const renderMarkdown = async (
   return div;
 };
 
-export const useRenderMarkdown = (markdown: string) => {
-  const { app } = useAppMount();
+export const cachedMarkdown = async (
+  cache: typeof localforage,
+  file: TFile,
+  component: Component,
+) => {
+  const div = document.createElement("div");
+  div.style.height = "100%";
+  div.style.width = "100%";
+
+  try {
+    if (component instanceof MarkdownRenderChild) {
+      const value = await cache.getItem(file.path);
+      div.innerHTML = value as string;
+    }
+  } catch (e) {
+    console.error(e);
+  }
+  return div;
+};
+
+export const useRenderMarkdown = (markdown: string, file: TFile) => {
+  const { app, cache } = useAppMount();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const renderRef = useRef<HTMLElement | null>(null);
   const [rendered, setRendered] = useState(false);
@@ -47,9 +68,13 @@ export const useRenderMarkdown = (markdown: string) => {
 
   useLayoutEffect(() => {
     (async () => {
-      const el = await renderMarkdown(app, sourcePath, component, markdown);
+      // const el = await renderMarkdown(app, sourcePath, component, markdown);
+      const el = await cachedMarkdown(cache, file, component);
 
       if (el) {
+        // if (el.innerHTML) {
+        //   await cache.setItem(file.path, el.innerHTML);
+        // }
         //Set the markdown ref equal to the markdown element that we just created
         renderRef.current = el;
 

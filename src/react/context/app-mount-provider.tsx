@@ -1,12 +1,14 @@
 import { App, Component } from "obsidian";
+import localforage from "localforage";
 
 import { ComponentChildren, createContext } from "preact";
 import { useContext } from "preact/hooks";
 
 interface ContextProps {
   app: App;
-  sourcePath: string;
   component: Component;
+  sourcePath: string;
+  cache: typeof localforage;
   children: ComponentChildren;
 }
 
@@ -17,7 +19,6 @@ export const useAppMount = () => {
   if (value === null) {
     throw new Error("useAppMount() called without a <AppMountProvider /> in the tree.");
   }
-
   return value;
 };
 
