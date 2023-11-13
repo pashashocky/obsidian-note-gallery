@@ -1,10 +1,19 @@
 import localforage from "localforage";
-import { EventRef, Events, Notice, Plugin, TFile } from "obsidian";
+import { extendPrototype as extendPrototypeSet } from "localforage-setitems";
+extendPrototypeSet(localforage);
+import { extendPrototype as extendPrototypeGet } from "localforage-getitems";
+extendPrototypeGet(localforage);
 
-type DatabaseItem<T> = {
-  data: T;
-  mtime: number;
-};
+import { EditorState } from "@codemirror/state";
+import { debounce, EventRef, Events, Plugin, TFile } from "obsidian";
+
+// @ts-expect-error (if somebody knows how to get rid of this TS error, please do share, allowSyntheticDefaultImports does not work)
+import Worker from "./database.worker";
+
+export type DatabaseItem<T> = { data: T; mtime: number };
+export type DatabaseEntry<T> = [string, DatabaseItem<T>];
+
+type MemoryDatabaseItem<T> = { data: T; mtime: number; dirty?: boolean };
 
 export class EventComponent extends Events {
   _events: (() => void)[] = [];
@@ -31,15 +40,55 @@ export class EventComponent extends Events {
  * Generic database class for storing data in indexedDB, automatically updates on file changes
  */
 export class Database<T> extends EventComponent {
-  ready: boolean;
-  cache: typeof localforage;
+  /**
+   * In-memory cache of the database
+   */
+  memory: Map<string, MemoryDatabaseItem<T>> = new Map();
 
-  on(
-    name: "database-ready" | "database-update",
-    callback: (entries: DatabaseItem<T>[]) => void,
+  /**
+   * IndexedDB instance for persisting data
+   */
+  persist: typeof localforage;
+
+  /**
+   * List of keys that have been deleted from the in-memory cache, but not yet from indexedDB
+   * @private
+   */
+  private deleted_keys: Set<string> = new Set();
+
+  /**
+   * Trigger database update after a short delay, also trigger database flush after a longer delay
+   */
+  databaseUpdate = debounce(
+    () => {
+      this.trigger("database-update", this.allEntries());
+      this.flushChanges();
+    },
+    100,
+    true,
+  );
+
+  /**
+   * Flush changes of memory database to indexedDB buffer
+   */
+  flushChanges = debounce(
+    async () => {
+      await this.persistMemory();
+      this.trigger("database-update", this.allEntries());
+    },
+    1000,
+    true,
+  );
+
+  public on(
+    name: "database-update" | "database-create",
+    callback: (update: DatabaseEntry<T>[]) => void,
     ctx?: unknown,
-  ) {
-    return super.on.call(this, name, callback, ctx);
+  ): EventRef;
+  public on(name: "database-migrate", callback: () => void, ctx?: unknown): EventRef;
+
+  on(name: string, callback: (...args: never[]) => void, ctx?: unknown): EventRef {
+    return super.on(name, callback, ctx);
   }
 
   /**
@@ -51,213 +100,299 @@ export class Database<T> extends EventComponent {
    * @param description Description of the database
    * @param defaultValue Constructor for the default value of the database
    * @param extractValue Provide new values for database on file modification
+   * @param workers Number of workers to use for parsing files
+   * @param loadValue On loading value from indexedDB, run this function on the value (useful for re-adding prototypes)
    */
   constructor(
-    plugin: Plugin,
-    name: string,
-    title: string,
-    version: number,
-    description: string,
-    defaultValue: () => T,
-    extractValue: (plugin: Plugin, file: TFile) => Promise<T>,
-    maybeExtractValue: (plugin: Plugin, file: TFile, value: T) => Promise<T | null>,
+    public plugin: Plugin,
+    public name: string,
+    public title: string,
+    public version: number,
+    public description: string,
+    private defaultValue: () => T,
+    private extractValue: (file: TFile, state?: EditorState) => Promise<T>,
+    public workers: number = 2,
+    private loadValue: (data: T) => T = (data: T) => data,
   ) {
     super();
 
     // localforage does not offer a method for accessing the database version, so we store it separately
-    const storedVersion = plugin.app.loadLocalStorage(name + "-version");
-    const oldVersion = storedVersion ? parseFloat(storedVersion) : storedVersion;
-    console.log({ appId: plugin.app.appId });
+    const localStorageVersion = this.plugin.app.loadLocalStorage(name + "-version");
+    const oldVersion = localStorageVersion ? parseInt(localStorageVersion) : null;
 
-    this.cache = localforage.createInstance({
-      name: name + `/${plugin.app.appId}`,
+    this.persist = localforage.createInstance({
+      name: this.name + `/${this.plugin.app.appId}`,
       driver: localforage.INDEXEDDB,
       description,
       version,
     });
-    this.ready = false;
 
-    plugin.app.workspace.onLayoutReady(async () => {
-      const document_fragment = new DocumentFragment();
-      const message = document_fragment.createEl("div");
-      const center = document_fragment.createEl("div", {
-        cls: "commentator-progress-bar",
+    this.plugin.app.workspace.onLayoutReady(async () => {
+      await this.persist.ready(async () => {
+        await this.loadDatabase();
+
+        this.trigger("database-update", this.allEntries());
+
+        // const operation_label =
+        //   oldVersion !== null && oldVersion < version
+        //     ? "migrating"
+        //     : this.isEmpty()
+        //     ? "initializing"
+        //     : "syncing";
+
+        if (oldVersion !== null && oldVersion < version && !this.isEmpty()) {
+          await this.clearDatabase();
+          await this.rebuildDatabase();
+          this.trigger("database-migrate");
+        } else if (this.isEmpty()) {
+          await this.rebuildDatabase();
+          this.trigger("database-create");
+        } else {
+          await this.syncDatabase();
+        }
+
+        // Alternatives: use 'this.editorExtensions.push(EditorView.updateListener.of(async (update) => {'
+        // 	for instant View updates, but this requires the file to be read into the file cache first
+        this.registerEvent(
+          this.plugin.app.vault.on("modify", async file => {
+            if (file instanceof TFile && file.extension === "md") {
+              const current_editor = this.plugin.app.workspace.activeEditor;
+              const state =
+                current_editor &&
+                current_editor.file?.path === file.path &&
+                current_editor.editor
+                  ? current_editor.editor.cm.state
+                  : undefined;
+              this.storeKey(
+                file.path,
+                await this.extractValue(file, state),
+                file.stat.mtime,
+              );
+            }
+          }),
+        );
+
+        this.registerEvent(
+          this.plugin.app.vault.on("delete", async file => {
+            if (file instanceof TFile && file.extension === "md")
+              this.deleteKey(file.path);
+          }),
+        );
+
+        this.registerEvent(
+          this.plugin.app.vault.on("rename", async (file, oldPath) => {
+            if (file instanceof TFile && file.extension === "md")
+              this.renameKey(oldPath, file.path, file.stat.mtime);
+          }),
+        );
+
+        this.registerEvent(
+          this.plugin.app.vault.on("create", async file => {
+            if (file instanceof TFile && file.extension === "md")
+              this.storeKey(file.path, this.defaultValue(), file.stat.mtime);
+          }),
+        );
       });
-
-      const markdownFiles = plugin.app.vault.getMarkdownFiles();
-
-      const progress_bar = center.createEl("progress");
-      progress_bar.setAttribute("max", markdownFiles.length.toString());
-      progress_bar.setAttribute("value", "0");
-
-      const notice = new Notice(document_fragment, 0);
-
-      if (oldVersion !== null && oldVersion < version && !(await this.isEmpty())) {
-        message.textContent = `Migrating ${title} database...`;
-        this.createDatabase(plugin, markdownFiles, extractValue, progress_bar, notice);
-        plugin.app.saveLocalStorage(name + "-version", version.toString());
-      } else if (await this.isEmpty()) {
-        message.textContent = `Initializing ${title} database...`;
-        this.createDatabase(plugin, markdownFiles, extractValue, progress_bar, notice);
-      } else {
-        message.textContent = `Loading ${title} database...`;
-
-        for (const key of await this.allKeys()) {
-          if (!markdownFiles.some(file => file.path === key)) await this.deleteKey(key);
-        }
-
-        for (let i = 0; i < markdownFiles.length; i++) {
-          const file = markdownFiles[i];
-          const value = await this.getItem(file.path);
-          if (value === null || value.mtime < file.stat.mtime) {
-            await this.storeKey(
-              file.path,
-              await extractValue(plugin, file),
-              file.stat.mtime,
-            );
-          } else {
-            const updated = await maybeExtractValue(plugin, file, value.data);
-            if (updated) await this.storeKey(file.path, updated, file.stat.mtime);
-          }
-
-          progress_bar.setAttribute("value", (i + 1).toString());
-        }
-
-        notice.hide();
-        setTimeout(async () => {
-          this.trigger("database-ready", await this.allEntries());
-        }, 500);
-        plugin.app.saveLocalStorage(name + "-version", version.toString());
-      }
-      this.ready = true;
-
-      // Alternatives: use 'this.editorExtensions.push(EditorView.updateListener.of(async (update) => {'
-      // 	for instant View updates, but this requires the file to be read into the cache first
-      this.registerEvent(
-        plugin.app.vault.on("modify", async file => {
-          if (file instanceof TFile) {
-            await this.storeKey(
-              file.path,
-              await extractValue(plugin, file),
-              file.stat.mtime,
-            );
-            this.trigger("database-update", await this.allEntries());
-          }
-        }),
-      );
-
-      this.registerEvent(
-        plugin.app.vault.on("delete", async file => {
-          if (file instanceof TFile) {
-            await this.deleteKey(file.path);
-            this.trigger("database-update", await this.allEntries());
-          }
-        }),
-      );
-
-      this.registerEvent(
-        plugin.app.vault.on("rename", async (file, oldPath) => {
-          if (file instanceof TFile) {
-            await this.renameKey(oldPath, file.path, file.stat.mtime);
-            this.trigger("database-update", await this.allEntries());
-          }
-        }),
-      );
-
-      this.registerEvent(
-        plugin.app.vault.on("create", async file => {
-          if (file instanceof TFile) {
-            await this.storeKey(file.path, defaultValue(), file.stat.mtime);
-            this.trigger("database-update", await this.allEntries());
-          }
-        }),
-      );
     });
   }
 
-  async createDatabase(
-    plugin: Plugin,
-    markdownFiles: TFile[],
-    extractValue: (plugin: Plugin, file: TFile) => Promise<T>,
-    progress_bar: HTMLProgressElement,
-    notice: Notice,
-  ) {
-    for (let i = 0; i < markdownFiles.length; i++) {
-      const file = markdownFiles[i];
-      await this.storeKey(file.path, await extractValue(plugin, file), file.stat.mtime);
-      progress_bar.setAttribute("value", (i + 1).toString());
+  /**
+   * Load database from indexedDB
+   */
+  async loadDatabase() {
+    this.memory = new Map(
+      Object.entries(
+        (await this.persist.getItems()) as Record<string, DatabaseItem<T>>,
+      ).map(([key, value]) => {
+        value.data = this.loadValue(value.data);
+        return [key, value];
+      }),
+    );
+  }
+
+  /**
+   * Extract values from files and store them in the database
+   * @remark Expensive, this function will block the main thread
+   * @param files Files to extract values from and store/update in the database
+   */
+  async regularParseFiles(files: TFile[]) {
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const value = this.getItem(file.path);
+      if (value === null || value.mtime < file.stat.mtime)
+        this.storeKey(file.path, await this.extractValue(file), file.stat.mtime, true);
     }
-    notice.hide();
-
-    setTimeout(
-      async () => this.trigger("database-ready", await this.allEntries()),
-      500,
-    );
   }
 
-  async storeKey(key: string, value: T, mtime?: number) {
-    await this.cache.setItem(key, {
-      data: value,
-      mtime: mtime ?? Date.now(),
+  /**
+   * Extract values from files and store them in the database using workers
+   * @remark Prefer usage of this function over regularParseFiles
+   * @param files Files to extract values from and store/update in the database
+   */
+  async workerParseFiles(files: TFile[]) {
+    const read_files = await Promise.all(
+      files.map(async file => await this.plugin.app.vault.cachedRead(file)),
+    );
+    const chunk_size = Math.ceil(files.length / this.workers);
+
+    for (let i = 0; i < this.workers; i++) {
+      const worker: Worker = new Worker(null, {
+        name: this.title + " indexer " + (i + 1),
+      });
+      const files_chunk = files.slice(i * chunk_size, (i + 1) * chunk_size);
+      const read_files_chunk = read_files.slice(i * chunk_size, (i + 1) * chunk_size);
+      worker.onmessage = (event: { data: T[] }) => {
+        for (let i = 0; i < files_chunk.length; i++) {
+          const file = files_chunk[i];
+          const extracted_value = this.loadValue(event.data[i]);
+          this.storeKey(file.path, extracted_value, file.stat.mtime, true);
+        }
+        worker.terminate();
+      };
+      worker.postMessage(read_files_chunk);
+    }
+
+    this.plugin.app.saveLocalStorage(this.name + "-version", this.version.toString());
+  }
+
+  /**
+   * Synchronize database with vault contents
+   */
+  async syncDatabase() {
+    const markdownFiles = this.plugin.app.vault.getMarkdownFiles();
+    this.allKeys().forEach(key => {
+      if (!markdownFiles.some(file => file.path === key)) this.deleteKey(key);
     });
-  }
 
-  async deleteKey(key: string) {
-    await this.cache.removeItem(key);
-  }
-
-  async renameKey(oldKey: string, newKey: string, mtime?: number) {
-    const value = await this.getItem(oldKey);
-    if (value == null) throw new Error("Key does not exist");
-
-    await this.storeKey(newKey, value.data, mtime);
-    await this.deleteKey(oldKey);
-  }
-
-  async allKeys(): Promise<string[]> {
-    return await this.cache.keys();
-  }
-
-  async getValue(key: string): Promise<T | null> {
-    return ((await this.cache.getItem(key)) as DatabaseItem<T> | null)?.data ?? null;
-  }
-
-  async allValues(): Promise<T[]> {
-    const keys = await this.allKeys();
-    return await Promise.all(keys.map(key => this.getValue(key) as Promise<T>));
-  }
-
-  async getItem(key: string): Promise<DatabaseItem<T> | null> {
-    return await this.cache.getItem(key);
-  }
-
-  async allItems(): Promise<DatabaseItem<T>[]> {
-    const keys = await this.allKeys();
-    return await Promise.all(
-      keys.map(key => this.cache.getItem(key) as Promise<DatabaseItem<T>>),
+    const filesToParse = markdownFiles.filter(
+      file =>
+        !this.memory.has(file.path) ||
+        this.memory.get(file.path)!.mtime < file.stat.mtime,
     );
+    if (filesToParse.length <= 100) await this.regularParseFiles(filesToParse);
+    else await this.workerParseFiles(filesToParse);
+
+    this.plugin.app.saveLocalStorage(this.name + "-version", this.version.toString());
   }
 
-  async allEntries(): Promise<[string, DatabaseItem<T>][] | null> {
-    const keys = await this.allKeys();
-    return await Promise.all(
-      keys.map(key =>
-        this.cache
-          .getItem(key)
-          .then(value => [key, value] as [string, DatabaseItem<T>]),
+  /**
+   * Rebuild database from scratch by parsing all files in the vault
+   */
+  async rebuildDatabase() {
+    await this.workerParseFiles(this.plugin.app.vault.getMarkdownFiles());
+    this.plugin.app.saveLocalStorage(this.name + "-version", this.version.toString());
+  }
+
+  /**
+   * Persist in-memory database to indexedDB
+   * @remark Prefer usage of flushChanges over this function to reduce the number of writes to indexedDB
+   */
+  async persistMemory() {
+    const to_set: Record<string, DatabaseItem<T>> = {};
+    for (const [key, value] of this.memory.entries()) {
+      if (value.dirty) {
+        to_set[key] = { data: value.data, mtime: value.mtime };
+        this.memory.set(key, { data: value.data, mtime: value.mtime, dirty: false });
+      }
+    }
+
+    await this.persist.setItems(to_set);
+    await Promise.all(
+      Array.from(this.deleted_keys.values()).map(
+        async key => await this.persist.removeItem(key),
       ),
     );
+    this.deleted_keys.clear();
   }
 
+  storeKey(key: string, value: T, mtime?: number, dirty = true) {
+    this.memory.set(key, { data: value, mtime: mtime ?? Date.now(), dirty });
+    this.databaseUpdate();
+  }
+
+  deleteKey(key: string) {
+    const value = this.getItem(key) as MemoryDatabaseItem<T>;
+    if (value == null) throw new Error("Key does not exist");
+
+    this.memory.delete(key);
+    this.deleted_keys.add(key);
+
+    this.databaseUpdate();
+  }
+
+  renameKey(oldKey: string, newKey: string, mtime?: number) {
+    const value = this.getItem(oldKey);
+    if (value == null) throw new Error("Key does not exist");
+
+    this.storeKey(newKey, value.data, mtime);
+    this.deleteKey(oldKey);
+    this.databaseUpdate();
+  }
+
+  allKeys(): string[] {
+    return Array.from(this.memory.keys());
+  }
+
+  getValue(key: string): T | null {
+    return this.memory.get(key)?.data ?? null;
+  }
+
+  allValues(): T[] {
+    return Array.from(this.memory.values()).map(value => value.data);
+  }
+
+  getItem(key: string): DatabaseItem<T> | null {
+    return this.memory.get(key) ?? null;
+  }
+
+  allItems(): DatabaseItem<T>[] {
+    return Array.from(this.memory.values());
+  }
+
+  allEntries(): DatabaseEntry<T>[] | null {
+    return Array.from(this.memory.entries());
+  }
+
+  /**
+   * Clear in-memory cache, and completely remove database from indexedDB (and all references in localStorage)
+   */
   async dropDatabase() {
-    await this.cache.dropInstance();
+    this.memory.clear();
+    await localforage.dropInstance({
+      name: this.name + `/${this.plugin.app.appId}`,
+    });
+    localStorage.removeItem(this.plugin.app.appId + "-" + this.name + "-version");
   }
 
+  /**
+   * Rebuild database from scratch
+   * @remark Useful for fixing incorrectly set version numbers
+   */
+  async reinitializeDatabase() {
+    await this.dropDatabase();
+    this.persist = localforage.createInstance({
+      name: this.name + `/${this.plugin.app.appId}`,
+      driver: localforage.INDEXEDDB,
+      version: this.version,
+      description: this.description,
+    });
+    await this.rebuildDatabase();
+    this.trigger("database-update", this.allEntries());
+  }
+
+  /**
+   * Clear in-memory cache, and clear database contents from indexedDB
+   */
   async clearDatabase() {
-    await this.cache.clear();
+    this.memory.clear();
+    await this.persist.clear();
   }
 
-  async isEmpty(): Promise<boolean> {
-    return (await this.cache.length()) == 0;
+  /**
+   * Check if database is empty
+   * @remark Run after `loadDatabase()`
+   */
+  isEmpty(): boolean {
+    return this.memory.size === 0;
   }
 }
