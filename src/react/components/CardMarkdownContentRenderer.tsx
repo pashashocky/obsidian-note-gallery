@@ -21,14 +21,14 @@ export interface ContentI {
 export default function CardMarkdownContentRenderer(
   props: CardMarkdownContentRendererProps,
 ) {
-  const { app, cache } = useAppMount();
+  const { app, db } = useAppMount();
   const { vault } = app;
   const { file } = props;
   const [content, setContent] = useState<ContentI>({ text: "", markdown: "" });
-  const { containerRef, renderRef, rendered } = useRenderMarkdown(
-    content.markdown,
-    file,
-  );
+  // const { containerRef, renderRef, rendered } = useRenderMarkdown(
+  //   content.markdown,
+  //   file,
+  // );
   const [innerHTML, setInnerHTML] = useState("");
 
   const ref = useRef<HTMLDivElement | null>(null);
@@ -61,10 +61,12 @@ export default function CardMarkdownContentRenderer(
 
   useEffect(() => {
     (async () => {
-      const value = await cache.getItem(file.path);
-      setInnerHTML(value as string);
+      const value = await db.getValue(file.path);
+      if (value) {
+        setInnerHTML(value.innerHTML as string);
+      }
     })();
-  }, [cache, file.path]);
+  }, [db, file.path]);
 
   return (
     <Fragment>
@@ -77,13 +79,13 @@ export default function CardMarkdownContentRenderer(
           className="card-content-container"
           ref={node => {
             // if (content.markdown !== "" && rendered && isVisible) {
-            containerRef.current = node;
-            appendOrReplaceFirstChild(node, renderRef.current);
+            // containerRef.current = node;
+            // appendOrReplaceFirstChild(node, renderRef.current);
             // }
           }}
         >
           {/*<div style={{ opacity: 0, whiteSpace: "pre-wrap" }}>{content.text}</div>*/}
-          {/*<div dangerouslySetInnerHTML={{ __html: innerHTML }} />*/}
+          <div dangerouslySetInnerHTML={{ __html: innerHTML }} />
         </div>
       </div>
     </Fragment>

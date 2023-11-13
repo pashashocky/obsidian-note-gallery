@@ -29,7 +29,8 @@ export const renderMarkdown = async (
   div.style.width = "100%";
 
   try {
-    if (component instanceof MarkdownRenderChild) {
+    // if (component instanceof MarkdownRenderChild) {
+    if (component) {
       await MarkdownRenderer.render(app, markdown, div, sourcePath, component);
     }
   } catch (e) {
@@ -48,10 +49,8 @@ export const cachedMarkdown = async (
   div.style.width = "100%";
 
   try {
-    if (component instanceof MarkdownRenderChild) {
-      const value = await cache.getItem(file.path);
-      div.innerHTML = value as string;
-    }
+    const value = await cache.getItem(file.path);
+    div.innerHTML = value as string;
   } catch (e) {
     console.error(e);
   }
@@ -69,7 +68,7 @@ export const useRenderMarkdown = (markdown: string, file: TFile) => {
   useLayoutEffect(() => {
     (async () => {
       // const el = await renderMarkdown(app, sourcePath, component, markdown);
-      const el = await cachedMarkdown(cache, file, component);
+      // const el = await cachedMarkdown(cache, file, component);
 
       if (el) {
         // if (el.innerHTML) {

@@ -5,7 +5,8 @@ import AppMount from "~/react/context/app-mount-provider";
 import Gallery from "~/react/components/Gallery";
 import { App, Component, TFile } from "obsidian";
 import { Settings } from "~/code-block/settings";
-import localforage from "localforage";
+import { Database } from "~/index/database";
+import { dbHTMLEntry } from "~/main";
 
 interface NoteGalleryAppProps {
   app: App;
@@ -13,7 +14,7 @@ interface NoteGalleryAppProps {
   sourcePath: string;
   settings: Settings;
   files: TFile[];
-  cache: typeof localforage;
+  db: Database<dbHTMLEntry>;
 }
 
 export default function NoteGalleryApp({
@@ -22,17 +23,9 @@ export default function NoteGalleryApp({
   sourcePath,
   files,
   settings,
-  cache,
+  db,
 }: NoteGalleryAppProps) {
   useEffect(() => {
-    (async () => {
-      const keys = await cache.keys();
-      const c = await Promise.all(
-        keys.map(key => cache.getItem(key) as Promise<string>),
-      );
-      console.log({ c });
-    })();
-
     document.documentElement.style.setProperty(
       "--note-card-font-size",
       settings.fontsize,
@@ -40,7 +33,7 @@ export default function NoteGalleryApp({
   });
   return (
     <StrictMode>
-      <AppMount app={app} component={component} sourcePath={sourcePath} cache={cache}>
+      <AppMount app={app} component={component} sourcePath={sourcePath} db={db}>
         <Gallery files={files} />
       </AppMount>
     </StrictMode>

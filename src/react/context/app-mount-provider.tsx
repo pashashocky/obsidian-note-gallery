@@ -1,14 +1,15 @@
 import { App, Component } from "obsidian";
-import localforage from "localforage";
 
 import { ComponentChildren, createContext } from "preact";
 import { useContext } from "preact/hooks";
+import { Database } from "~/index/database";
+import { dbHTMLEntry } from "~/main";
 
 interface ContextProps {
   app: App;
   component: Component;
   sourcePath: string;
-  cache: typeof localforage;
+  db: Database<dbHTMLEntry>;
   children: ComponentChildren;
 }
 
