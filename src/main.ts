@@ -2,7 +2,6 @@ import { Plugin, TFile } from "obsidian";
 import CodeBlockNoteGallery from "~/code-block";
 
 import { Database } from "~/index/database";
-import { renderMarkdown } from "~/react/utils/render-utils";
 
 export interface dbHTMLEntry {
   text: string | null;
@@ -35,14 +34,24 @@ async function preCache(plugin: Plugin, file: TFile): Promise<dbHTMLEntry> {
   }
   const text = markdown.split("\n").slice(0, linesToKeep).join("\n");
   markdown = [frontmatter, text].join("\n").trim();
-  const div = await renderMarkdown(app, "/", plugin, markdown);
   return {
     text,
     markdown,
-    innerHTML: div.innerHTML,
+    innerHTML: null,
     hasMarkdown: true,
-    rendered: true,
+    rendered: false,
   };
+}
+
+async function removeRendered(
+  _plugin: Plugin,
+  _file: TFile,
+  value: dbHTMLEntry,
+): Promise<dbHTMLEntry | null> {
+  if (value.innerHTML || value.rendered) {
+    return { ...value, innerHTML: null, rendered: false };
+  }
+  return null;
 }
 
 export default class NoteGalleryPlugin extends Plugin {
@@ -60,9 +69,8 @@ export default class NoteGalleryPlugin extends Plugin {
       "Stores rendered HTML of a file to be rendered by the note gallery",
       () => DEFAULT_DB_ENTRY,
       preCache,
+      removeRendered,
     );
-    // await database.dropDatabase();
-    console.log(await this.db.allEntries());
     this.registerMarkdownCodeBlockProcessor("note-gallery", (src, el, ctx) => {
       const handler = new CodeBlockNoteGallery(this, src, el, this.app, ctx);
       ctx.addChild(handler);

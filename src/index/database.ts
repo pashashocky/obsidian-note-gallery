@@ -31,10 +31,11 @@ export class EventComponent extends Events {
  * Generic database class for storing data in indexedDB, automatically updates on file changes
  */
 export class Database<T> extends EventComponent {
+  ready: boolean;
   cache: typeof localforage;
 
   on(
-    name: "database-update" | "database-create",
+    name: "database-ready" | "database-update",
     callback: (entries: DatabaseItem<T>[]) => void,
     ctx?: unknown,
   ) {
@@ -59,12 +60,14 @@ export class Database<T> extends EventComponent {
     description: string,
     defaultValue: () => T,
     extractValue: (plugin: Plugin, file: TFile) => Promise<T>,
+    maybeExtractValue: (plugin: Plugin, file: TFile, value: T) => Promise<T | null>,
   ) {
     super();
 
     // localforage does not offer a method for accessing the database version, so we store it separately
     const storedVersion = plugin.app.loadLocalStorage(name + "-version");
     const oldVersion = storedVersion ? parseFloat(storedVersion) : storedVersion;
+    console.log({ appId: plugin.app.appId });
 
     this.cache = localforage.createInstance({
       name: name + `/${plugin.app.appId}`,
@@ -72,6 +75,7 @@ export class Database<T> extends EventComponent {
       description,
       version,
     });
+    this.ready = false;
 
     plugin.app.workspace.onLayoutReady(async () => {
       const document_fragment = new DocumentFragment();
@@ -95,7 +99,6 @@ export class Database<T> extends EventComponent {
       } else if (await this.isEmpty()) {
         message.textContent = `Initializing ${title} database...`;
         this.createDatabase(plugin, markdownFiles, extractValue, progress_bar, notice);
-        this.trigger("database-create");
       } else {
         message.textContent = `Loading ${title} database...`;
 
@@ -106,22 +109,27 @@ export class Database<T> extends EventComponent {
         for (let i = 0; i < markdownFiles.length; i++) {
           const file = markdownFiles[i];
           const value = await this.getItem(file.path);
-          if (value === null || value.mtime < file.stat.mtime)
+          if (value === null || value.mtime < file.stat.mtime) {
             await this.storeKey(
               file.path,
               await extractValue(plugin, file),
               file.stat.mtime,
             );
+          } else {
+            const updated = await maybeExtractValue(plugin, file, value.data);
+            if (updated) await this.storeKey(file.path, updated, file.stat.mtime);
+          }
 
           progress_bar.setAttribute("value", (i + 1).toString());
         }
 
         notice.hide();
         setTimeout(async () => {
-          this.trigger("database-update", await this.allEntries());
-        }, 1000);
+          this.trigger("database-ready", await this.allEntries());
+        }, 500);
         plugin.app.saveLocalStorage(name + "-version", version.toString());
       }
+      this.ready = true;
 
       // Alternatives: use 'this.editorExtensions.push(EditorView.updateListener.of(async (update) => {'
       // 	for instant View updates, but this requires the file to be read into the cache first
@@ -182,8 +190,8 @@ export class Database<T> extends EventComponent {
     notice.hide();
 
     setTimeout(
-      async () => this.trigger("database-update", await this.allEntries()),
-      1000,
+      async () => this.trigger("database-ready", await this.allEntries()),
+      500,
     );
   }
 
