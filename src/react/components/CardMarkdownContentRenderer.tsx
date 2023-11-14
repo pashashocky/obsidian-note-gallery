@@ -71,7 +71,7 @@ export default function CardMarkdownContentRenderer(
   return (
     <Fragment>
       <div ref={ref}>
-        <hr style={{ borderTop: "1px solid red" }} />
+        <hr style={{ borderTop: "1px solid sandybrown" }} />
         <div
           style={{
             opacity: isVisible ? 1 : 0,
