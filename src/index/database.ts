@@ -56,6 +56,8 @@ export class Database<T> extends EventComponent {
    */
   private deleted_keys: Set<string> = new Set();
 
+  public ready = false;
+
   /**
    * Trigger database update after a short delay, also trigger database flush after a longer delay
    */
@@ -154,6 +156,7 @@ export class Database<T> extends EventComponent {
         } else {
           await this.syncDatabase(progress_bar, notice);
         }
+        this.ready = true;
 
         // Alternatives: use 'this.editorExtensions.push(EditorView.updateListener.of(async (update) => {'
         // 	for instant View updates, but this requires the file to be read into the file cache first
@@ -288,9 +291,10 @@ export class Database<T> extends EventComponent {
         !this.memory.has(file.path) ||
         this.memory.get(file.path)!.mtime < file.stat.mtime,
     );
-    if (filesToParse.length <= 100)
-      await this.regularParseFiles(filesToParse, progress_bar);
-    else await this.workerParseFiles(filesToParse, progress_bar);
+    // if (filesToParse.length <= 100)
+    //   await this.regularParseFiles(filesToParse, progress_bar);
+    // else await this.workerParseFiles(filesToParse, progress_bar);
+    await this.regularParseFiles(filesToParse, progress_bar);
 
     this.plugin.app.saveLocalStorage(this.name + "-version", this.version.toString());
     notice.hide();
@@ -302,7 +306,8 @@ export class Database<T> extends EventComponent {
   async rebuildDatabase(progress_bar: HTMLProgressElement, notice: Notice) {
     const markdownFiles = this.plugin.app.vault.getMarkdownFiles();
     this.initializeProgressBar(progress_bar, markdownFiles.length);
-    await this.workerParseFiles(markdownFiles, progress_bar);
+    // await this.workerParseFiles(markdownFiles, progress_bar);
+    await this.regularParseFiles(markdownFiles, progress_bar);
     this.plugin.app.saveLocalStorage(this.name + "-version", this.version.toString());
     notice.hide();
   }

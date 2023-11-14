@@ -27,16 +27,15 @@ export default function NoteGalleryApp({
 }: NoteGalleryAppProps) {
   const [databaseReady, setDatabaseReady] = useState(false);
   useEffect(() => {
-    db.on("database-ready", () => setDatabaseReady(true));
-    if (db.ready) {
-      setDatabaseReady(true);
-    }
     // TODO: test this works for multiple instances of code block
     // should maybe be containerEl
     document.documentElement.style.setProperty(
       "--note-card-font-size",
       settings.fontsize,
     );
+
+    if (db.ready) setDatabaseReady(true);
+    db.on("database-update", () => setDatabaseReady(true));
     return () => {
       db.off("database-ready", () => setDatabaseReady(true));
     };
