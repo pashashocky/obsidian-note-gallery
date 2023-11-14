@@ -13,7 +13,6 @@ export default function CardMarkdownContent(props: CardMarkdownContentProps) {
   return (
     <Fragment>
       <div className="inline-title">{file.basename}</div>
-      <hr />
       <div className="card-content">
         <div className="card-content-wall" />
         <CardMarkdownContentRenderer file={file} />
