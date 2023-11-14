@@ -1,3 +1,4 @@
+import { EditorState } from "@codemirror/state";
 import { Plugin, TFile } from "obsidian";
 import CodeBlockNoteGallery from "~/code-block";
 
@@ -19,13 +20,13 @@ const DEFAULT_DB_ENTRY: dbHTMLEntry = {
   rendered: false,
 };
 
-const linesToKeep = 30;
-async function preCache(plugin: Plugin, file: TFile): Promise<dbHTMLEntry> {
-  const { app } = plugin;
-  const { vault } = app;
-  let markdown = await vault.cachedRead(file);
-
+export async function extractValue(
+  markdown: string,
+  _file: TFile,
+  _state?: EditorState,
+): Promise<dbHTMLEntry> {
   // the idea of the below is to trim the content to the first n linesToKeep
+  const linesToKeep = 30;
   let frontmatter = "";
   if (markdown.startsWith("---")) {
     const i = markdown.indexOf("---", 3); // second instance
@@ -37,21 +38,17 @@ async function preCache(plugin: Plugin, file: TFile): Promise<dbHTMLEntry> {
   return {
     text,
     markdown,
-    innerHTML: null,
     hasMarkdown: true,
+    innerHTML: null,
     rendered: false,
   };
 }
 
-async function removeRendered(
-  _plugin: Plugin,
-  _file: TFile,
-  value: dbHTMLEntry,
-): Promise<dbHTMLEntry | null> {
-  if (value.innerHTML || value.rendered) {
-    return { ...value, innerHTML: null, rendered: false };
+function loadValue(data: dbHTMLEntry): dbHTMLEntry {
+  if (data.innerHTML || data.rendered) {
+    data = { ...data, innerHTML: null, rendered: false };
   }
-  return null;
+  return data;
 }
 
 export default class NoteGalleryPlugin extends Plugin {
@@ -64,12 +61,13 @@ export default class NoteGalleryPlugin extends Plugin {
     this.db = new Database(
       this,
       "note-gallery-render-store",
-      "rendered markdown cache",
+      "Render Store",
       1,
-      "Stores rendered HTML of a file to be rendered by the note gallery",
+      "Stores text and renderedHTML of a file to be rendered by the note gallery",
       () => DEFAULT_DB_ENTRY,
-      preCache,
-      removeRendered,
+      extractValue,
+      2,
+      loadValue,
     );
     this.registerMarkdownCodeBlockProcessor("note-gallery", (src, el, ctx) => {
       const handler = new CodeBlockNoteGallery(this, src, el, this.app, ctx);

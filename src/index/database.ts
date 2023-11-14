@@ -1,11 +1,11 @@
 import localforage from "localforage";
-import { extendPrototype as extendPrototypeSet } from "localforage-setitems";
-extendPrototypeSet(localforage);
-import { extendPrototype as extendPrototypeGet } from "localforage-getitems";
-extendPrototypeGet(localforage);
-
 import { EditorState } from "@codemirror/state";
-import { debounce, EventRef, Events, Plugin, TFile } from "obsidian";
+import { debounce, EventRef, Events, Plugin, Notice, TFile } from "obsidian";
+import { extendPrototype as extendPrototypeGet } from "localforage-getitems";
+import { extendPrototype as extendPrototypeSet } from "localforage-setitems";
+
+extendPrototypeSet(localforage);
+extendPrototypeGet(localforage);
 
 // @ts-expect-error (if somebody knows how to get rid of this TS error, please do share, allowSyntheticDefaultImports does not work)
 import Worker from "./database.worker";
@@ -110,7 +110,11 @@ export class Database<T> extends EventComponent {
     public version: number,
     public description: string,
     private defaultValue: () => T,
-    private extractValue: (file: TFile, state?: EditorState) => Promise<T>,
+    private extractValue: (
+      markdown: string,
+      file: TFile,
+      state?: EditorState,
+    ) => Promise<T>,
     public workers: number = 2,
     private loadValue: (data: T) => T = (data: T) => data,
   ) {
@@ -132,23 +136,23 @@ export class Database<T> extends EventComponent {
         await this.loadDatabase();
 
         this.trigger("database-update", this.allEntries());
-
-        // const operation_label =
-        //   oldVersion !== null && oldVersion < version
-        //     ? "migrating"
-        //     : this.isEmpty()
-        //     ? "initializing"
-        //     : "syncing";
+        const operation_label =
+          oldVersion !== null && oldVersion < version
+            ? "Migrating"
+            : this.isEmpty()
+            ? "Initializing"
+            : "Syncing";
+        const { progress_bar, notice } = this.createNotice(operation_label, title);
 
         if (oldVersion !== null && oldVersion < version && !this.isEmpty()) {
           await this.clearDatabase();
-          await this.rebuildDatabase();
+          await this.rebuildDatabase(progress_bar, notice);
           this.trigger("database-migrate");
         } else if (this.isEmpty()) {
-          await this.rebuildDatabase();
+          await this.rebuildDatabase(progress_bar, notice);
           this.trigger("database-create");
         } else {
-          await this.syncDatabase();
+          await this.syncDatabase(progress_bar, notice);
         }
 
         // Alternatives: use 'this.editorExtensions.push(EditorView.updateListener.of(async (update) => {'
@@ -163,9 +167,10 @@ export class Database<T> extends EventComponent {
                 current_editor.editor
                   ? current_editor.editor.cm.state
                   : undefined;
+              const markdown = await this.plugin.app.vault.cachedRead(file);
               this.storeKey(
                 file.path,
-                await this.extractValue(file, state),
+                await this.extractValue(markdown, file, state),
                 file.stat.mtime,
               );
             }
@@ -215,12 +220,20 @@ export class Database<T> extends EventComponent {
    * @remark Expensive, this function will block the main thread
    * @param files Files to extract values from and store/update in the database
    */
-  async regularParseFiles(files: TFile[]) {
+  async regularParseFiles(files: TFile[], progress_bar: HTMLProgressElement) {
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const value = this.getItem(file.path);
-      if (value === null || value.mtime < file.stat.mtime)
-        this.storeKey(file.path, await this.extractValue(file), file.stat.mtime, true);
+      if (value === null || value.mtime < file.stat.mtime) {
+        const markdown = await this.plugin.app.vault.cachedRead(file);
+        this.storeKey(
+          file.path,
+          await this.extractValue(markdown, file),
+          file.stat.mtime,
+          true,
+        );
+      }
+      progress_bar.setAttribute("value", (i + 1).toString());
     }
   }
 
@@ -229,11 +242,14 @@ export class Database<T> extends EventComponent {
    * @remark Prefer usage of this function over regularParseFiles
    * @param files Files to extract values from and store/update in the database
    */
-  async workerParseFiles(files: TFile[]) {
+  async workerParseFiles(files: TFile[], progress_bar: HTMLProgressElement) {
     const read_files = await Promise.all(
-      files.map(async file => await this.plugin.app.vault.cachedRead(file)),
+      files.map(async file => {
+        return { file, markdown: await this.plugin.app.vault.cachedRead(file) };
+      }),
     );
     const chunk_size = Math.ceil(files.length / this.workers);
+    let processed = 0;
 
     for (let i = 0; i < this.workers; i++) {
       const worker: Worker = new Worker(null, {
@@ -242,10 +258,12 @@ export class Database<T> extends EventComponent {
       const files_chunk = files.slice(i * chunk_size, (i + 1) * chunk_size);
       const read_files_chunk = read_files.slice(i * chunk_size, (i + 1) * chunk_size);
       worker.onmessage = (event: { data: T[] }) => {
-        for (let i = 0; i < files_chunk.length; i++) {
-          const file = files_chunk[i];
-          const extracted_value = this.loadValue(event.data[i]);
+        for (let j = 0; j < files_chunk.length; j++) {
+          const file = files_chunk[j];
+          const extracted_value = this.loadValue(event.data[j]);
           this.storeKey(file.path, extracted_value, file.stat.mtime, true);
+          processed += 1;
+          progress_bar.setAttribute("value", (processed + 1).toString());
         }
         worker.terminate();
       };
@@ -258,8 +276,9 @@ export class Database<T> extends EventComponent {
   /**
    * Synchronize database with vault contents
    */
-  async syncDatabase() {
+  async syncDatabase(progress_bar: HTMLProgressElement, notice: Notice) {
     const markdownFiles = this.plugin.app.vault.getMarkdownFiles();
+    this.initializeProgressBar(progress_bar, markdownFiles.length);
     this.allKeys().forEach(key => {
       if (!markdownFiles.some(file => file.path === key)) this.deleteKey(key);
     });
@@ -269,18 +288,23 @@ export class Database<T> extends EventComponent {
         !this.memory.has(file.path) ||
         this.memory.get(file.path)!.mtime < file.stat.mtime,
     );
-    if (filesToParse.length <= 100) await this.regularParseFiles(filesToParse);
-    else await this.workerParseFiles(filesToParse);
+    if (filesToParse.length <= 100)
+      await this.regularParseFiles(filesToParse, progress_bar);
+    else await this.workerParseFiles(filesToParse, progress_bar);
 
     this.plugin.app.saveLocalStorage(this.name + "-version", this.version.toString());
+    notice.hide();
   }
 
   /**
    * Rebuild database from scratch by parsing all files in the vault
    */
-  async rebuildDatabase() {
-    await this.workerParseFiles(this.plugin.app.vault.getMarkdownFiles());
+  async rebuildDatabase(progress_bar: HTMLProgressElement, notice: Notice) {
+    const markdownFiles = this.plugin.app.vault.getMarkdownFiles();
+    this.initializeProgressBar(progress_bar, markdownFiles.length);
+    await this.workerParseFiles(markdownFiles, progress_bar);
     this.plugin.app.saveLocalStorage(this.name + "-version", this.version.toString());
+    notice.hide();
   }
 
   /**
@@ -303,6 +327,26 @@ export class Database<T> extends EventComponent {
       ),
     );
     this.deleted_keys.clear();
+  }
+
+  createNotice(
+    operation_label: string,
+    title: string,
+  ): { progress_bar: HTMLProgressElement; notice: Notice } {
+    const document_fragment = new DocumentFragment();
+    const message = document_fragment.createEl("div");
+    const center = document_fragment.createEl("div", {
+      cls: "commentator-progress-bar",
+    });
+    const notice = new Notice(document_fragment, 0);
+    const progress_bar = center.createEl("progress");
+    message.textContent = `${operation_label} ${title} database...`;
+    return { progress_bar, notice };
+  }
+
+  initializeProgressBar(progress_bar: HTMLProgressElement, max: number) {
+    progress_bar.setAttribute("max", max.toString());
+    progress_bar.setAttribute("value", "0");
   }
 
   storeKey(key: string, value: T, mtime?: number, dirty = true) {
@@ -376,7 +420,9 @@ export class Database<T> extends EventComponent {
       version: this.version,
       description: this.description,
     });
-    await this.rebuildDatabase();
+    const operation_label = "Initializing";
+    const { progress_bar, notice } = this.createNotice(operation_label, this.title);
+    await this.rebuildDatabase(progress_bar, notice);
     this.trigger("database-update", this.allEntries());
   }
 
