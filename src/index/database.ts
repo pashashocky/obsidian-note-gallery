@@ -7,8 +7,8 @@ import { extendPrototype as extendPrototypeSet } from "localforage-setitems";
 extendPrototypeSet(localforage);
 extendPrototypeGet(localforage);
 
-// @ts-expect-error (if somebody knows how to get rid of this TS error, please do share, allowSyntheticDefaultImports does not work)
-import Worker from "./database.worker";
+// // @ts-expect-error (if somebody knows how to get rid of this TS error, please do share, allowSyntheticDefaultImports does not work)
+// import Worker from "./database.worker";
 
 export type DatabaseItem<T> = { data: T; mtime: number };
 export type DatabaseEntry<T> = [string, DatabaseItem<T>];
@@ -245,36 +245,36 @@ export class Database<T> extends EventComponent {
    * @remark Prefer usage of this function over regularParseFiles
    * @param files Files to extract values from and store/update in the database
    */
-  async workerParseFiles(files: TFile[], progress_bar: HTMLProgressElement) {
-    const read_files = await Promise.all(
-      files.map(async file => {
-        return { file, markdown: await this.plugin.app.vault.cachedRead(file) };
-      }),
-    );
-    const chunk_size = Math.ceil(files.length / this.workers);
-    let processed = 0;
+  // async workerParseFiles(files: TFile[], progress_bar: HTMLProgressElement) {
+  //   const read_files = await Promise.all(
+  //     files.map(async file => {
+  //       return { file, markdown: await this.plugin.app.vault.cachedRead(file) };
+  //     }),
+  //   );
+  //   const chunk_size = Math.ceil(files.length / this.workers);
+  //   let processed = 0;
 
-    for (let i = 0; i < this.workers; i++) {
-      const worker: Worker = new Worker(null, {
-        name: this.title + " indexer " + (i + 1),
-      });
-      const files_chunk = files.slice(i * chunk_size, (i + 1) * chunk_size);
-      const read_files_chunk = read_files.slice(i * chunk_size, (i + 1) * chunk_size);
-      worker.onmessage = (event: { data: T[] }) => {
-        for (let j = 0; j < files_chunk.length; j++) {
-          const file = files_chunk[j];
-          const extracted_value = this.loadValue(event.data[j]);
-          this.storeKey(file.path, extracted_value, file.stat.mtime, true);
-          processed += 1;
-          progress_bar.setAttribute("value", (processed + 1).toString());
-        }
-        worker.terminate();
-      };
-      worker.postMessage(read_files_chunk);
-    }
+  //   for (let i = 0; i < this.workers; i++) {
+  //     const worker: Worker = new Worker(null, {
+  //       name: this.title + " indexer " + (i + 1),
+  //     });
+  //     const files_chunk = files.slice(i * chunk_size, (i + 1) * chunk_size);
+  //     const read_files_chunk = read_files.slice(i * chunk_size, (i + 1) * chunk_size);
+  //     worker.onmessage = (event: { data: T[] }) => {
+  //       for (let j = 0; j < files_chunk.length; j++) {
+  //         const file = files_chunk[j];
+  //         const extracted_value = this.loadValue(event.data[j]);
+  //         this.storeKey(file.path, extracted_value, file.stat.mtime, true);
+  //         processed += 1;
+  //         progress_bar.setAttribute("value", (processed + 1).toString());
+  //       }
+  //       worker.terminate();
+  //     };
+  //     worker.postMessage(read_files_chunk);
+  //   }
 
-    this.plugin.app.saveLocalStorage(this.name + "-version", this.version.toString());
-  }
+  //   this.plugin.app.saveLocalStorage(this.name + "-version", this.version.toString());
+  // }
 
   /**
    * Synchronize database with vault contents
