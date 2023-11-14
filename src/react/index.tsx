@@ -39,7 +39,7 @@ export default function NoteGalleryApp({
     return () => {
       db.off("database-ready", () => setDatabaseReady(true));
     };
-  }, [db, app, settings.fontsize]);
+  }, [db, settings.fontsize]);
   return (
     <StrictMode>
       <AppMount app={app} component={component} sourcePath={sourcePath} db={db}>
