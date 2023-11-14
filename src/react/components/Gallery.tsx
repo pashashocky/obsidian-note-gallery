@@ -24,7 +24,7 @@ export default function Gallery({ files }: { files: TFile[] }) {
     400: 2,
   };
 
-  const itemsPerPage = 200;
+  const itemsPerPage = 300;
   const [hasMore, setHasMore] = useState(true);
   const [numRendered, setNumRendered] = useState(itemsPerPage);
 

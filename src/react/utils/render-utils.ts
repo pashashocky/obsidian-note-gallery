@@ -1,7 +1,7 @@
 import { useRef, useState, useLayoutEffect } from "preact/hooks";
 import { useAppMount } from "~/react/context/app-mount-provider";
 import { App, MarkdownRenderer, Component, MarkdownRenderChild, TFile } from "obsidian";
-import localforage from "localforage";
+import { dbHTMLEntry } from "~/main";
 
 export const appendOrReplaceFirstChild = (
   container: HTMLElement | null,
@@ -29,8 +29,7 @@ export const renderMarkdown = async (
   div.style.width = "100%";
 
   try {
-    // if (component instanceof MarkdownRenderChild) {
-    if (component) {
+    if (component instanceof MarkdownRenderChild) {
       await MarkdownRenderer.render(app, markdown, div, sourcePath, component);
     }
   } catch (e) {
@@ -39,41 +38,39 @@ export const renderMarkdown = async (
   return div;
 };
 
-export const cachedMarkdown = async (
-  cache: typeof localforage,
-  file: TFile,
-  component: Component,
-) => {
+export const cachedMarkdown = (innerHTML: string) => {
   const div = document.createElement("div");
   div.style.height = "100%";
   div.style.width = "100%";
 
   try {
-    const value = await cache.getItem(file.path);
-    div.innerHTML = value as string;
+    div.innerHTML = innerHTML;
   } catch (e) {
     console.error(e);
   }
   return div;
 };
 
-export const useRenderMarkdown = (markdown: string, file: TFile) => {
-  const { app, cache } = useAppMount();
+export const useRenderMarkdown = (entry: dbHTMLEntry, file: TFile) => {
+  const { app, db, component, sourcePath } = useAppMount();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const renderRef = useRef<HTMLElement | null>(null);
   const [rendered, setRendered] = useState(false);
-
-  const { component, sourcePath } = useAppMount();
+  const [cached, setCached] = useState(true);
 
   useLayoutEffect(() => {
     (async () => {
-      // const el = await renderMarkdown(app, sourcePath, component, markdown);
-      // const el = await cachedMarkdown(cache, file, component);
+      let el: HTMLDivElement | null = null;
+      if (entry.rendered && entry.innerHTML) {
+        el = cachedMarkdown(entry.innerHTML);
+      } else if (entry.hasMarkdown && entry.markdown) {
+        el = await renderMarkdown(app, sourcePath, component, entry.markdown);
+        const value = { ...entry, rendered: true, innerHTML: el.innerHTML };
+        db.storeKey(file.path, value, file.stat.mtime, false);
+        setCached(false);
+      }
 
-      if (el) {
-        // if (el.innerHTML) {
-        //   await cache.setItem(file.path, el.innerHTML);
-        // }
+      if (el && el.innerHTML) {
         //Set the markdown ref equal to the markdown element that we just created
         renderRef.current = el;
 
@@ -85,12 +82,13 @@ export const useRenderMarkdown = (markdown: string, file: TFile) => {
     })();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [markdown, sourcePath]);
+  }, [entry, sourcePath]);
 
   return {
     containerRef,
     renderRef,
     rendered,
+    cached,
   };
 };
 

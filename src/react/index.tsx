@@ -1,4 +1,3 @@
-import { StrictMode } from "preact/compat";
 import { useEffect, useState } from "preact/hooks";
 
 import AppMount from "~/react/context/app-mount-provider";
@@ -11,6 +10,7 @@ import { dbHTMLEntry } from "~/main";
 interface NoteGalleryAppProps {
   app: App;
   component: Component;
+  containerEl: HTMLElement;
   sourcePath: string;
   settings: Settings;
   files: TFile[];
@@ -20,6 +20,7 @@ interface NoteGalleryAppProps {
 export default function NoteGalleryApp({
   app,
   component,
+  containerEl,
   sourcePath,
   files,
   settings,
@@ -27,29 +28,23 @@ export default function NoteGalleryApp({
 }: NoteGalleryAppProps) {
   const [databaseReady, setDatabaseReady] = useState(false);
   useEffect(() => {
-    // TODO: test this works for multiple instances of code block
-    // should maybe be containerEl
-    document.documentElement.style.setProperty(
-      "--note-card-font-size",
-      settings.fontsize,
-    );
+    containerEl.style.setProperty("--note-card-font-size", settings.fontsize);
 
+    console.log({ items: db.allItems() });
     if (db.ready) setDatabaseReady(true);
     db.on("database-update", () => setDatabaseReady(true));
     return () => {
       db.off("database-ready", () => setDatabaseReady(true));
     };
-  }, [db, settings.fontsize]);
+  }, [db, settings.fontsize, containerEl]);
   return (
-    <StrictMode>
-      <AppMount app={app} component={component} sourcePath={sourcePath} db={db}>
-        {!databaseReady && (
-          <div>
-            <h1>LOADING {databaseReady}</h1>
-          </div>
-        )}
-        {databaseReady && <Gallery files={files} />}
-      </AppMount>
-    </StrictMode>
+    <AppMount app={app} component={component} sourcePath={sourcePath} db={db}>
+      {!databaseReady && (
+        <div>
+          <h1>LOADING {databaseReady}</h1>
+        </div>
+      )}
+      {databaseReady && <Gallery files={files} />}
+    </AppMount>
   );
 }

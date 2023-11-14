@@ -1,6 +1,6 @@
 import { TFile } from "obsidian";
 import { Fragment } from "preact";
-import { useEffect, useRef, useState } from "preact/hooks";
+import { useRef } from "preact/hooks";
 
 import {
   useRenderMarkdown,
@@ -21,15 +21,12 @@ export interface ContentI {
 export default function CardMarkdownContentRenderer(
   props: CardMarkdownContentRendererProps,
 ) {
-  const { app, db } = useAppMount();
-  const { vault } = app;
+  const { db } = useAppMount();
   const { file } = props;
-  const [content, setContent] = useState<ContentI>({ text: "", markdown: "" });
-  // const { containerRef, renderRef, rendered } = useRenderMarkdown(
-  //   content.markdown,
-  //   file,
-  // );
-  const [innerHTML, setInnerHTML] = useState("");
+
+  const fileCache = db.getItem(file.path)!;
+  const { data } = fileCache;
+  const { containerRef, renderRef, rendered, cached } = useRenderMarkdown(data, file);
 
   const ref = useRef<HTMLDivElement | null>(null);
   const entry = useIntersectionObserver(ref, {
@@ -38,55 +35,28 @@ export default function CardMarkdownContentRenderer(
   });
   const isVisible = !!entry?.isIntersecting;
 
-  // const linesToKeep = 30;
-  // useEffect(() => {
-  //   (async () => {
-  //     let markdown = await vault.cachedRead(file);
-
-  //     // the idea of the below is to trim the content to the first n linesToKeep
-  //     let frontmatter = "";
-  //     if (markdown.startsWith("---")) {
-  //       const i = markdown.indexOf("---", 3); // second instance
-  //       frontmatter = markdown.slice(0, i + 3).trim();
-  //       markdown = markdown.slice(i + 3, markdown.length).trim();
-  //     }
-  //     const text = markdown.split("\n").slice(0, linesToKeep).join("\n");
-  //     markdown = [frontmatter, text].join("\n").trim();
-
-  //     setContent({ text, markdown: markdown });
-  //   })();
-
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [file]);
-
-  useEffect(() => {
-    (async () => {
-      const value = await db.getValue(file.path);
-      if (value) {
-        setInnerHTML(value.innerHTML as string);
-      }
-    })();
-  }, [db, file.path]);
-
   return (
     <Fragment>
       <div ref={ref}>
-        <hr style={{ borderTop: "1px solid sandybrown" }} />
+        <hr
+          style={{
+            borderTop: cached ? "" : "1px solid var(--interactive-accent-tint)",
+          }}
+        />
         <div
           style={{
             opacity: isVisible ? 1 : 0,
-            transition: "opacity ease-in 200ms",
+            transition: "opacity ease-in 100ms",
           }}
           className="card-content-container"
           ref={node => {
-            // if (content.markdown !== "" && rendered && isVisible) {
-            // containerRef.current = node;
-            // appendOrReplaceFirstChild(node, renderRef.current);
-            // }
+            if (data.hasMarkdown && data.markdown !== "" && rendered && isVisible) {
+              containerRef.current = node;
+              appendOrReplaceFirstChild(node, renderRef.current);
+            }
           }}
         >
-          {/*<div style={{ opacity: 0, whiteSpace: "pre-wrap" }}>{content.text}</div>*/}
-          <div dangerouslySetInnerHTML={{ __html: innerHTML }} />
+          <div style={{ opacity: 0, whiteSpace: "pre-wrap" }}>{data.text}</div>
         </div>
       </div>
     </Fragment>
