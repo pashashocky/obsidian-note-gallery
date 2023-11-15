@@ -65,8 +65,13 @@ export const useRenderMarkdown = (entry: dbHTMLEntry, file: TFile) => {
         el = cachedMarkdown(entry.innerHTML);
       } else if (entry.hasMarkdown && entry.markdown) {
         el = await renderMarkdown(app, sourcePath, component, entry.markdown);
-        const value = { ...entry, rendered: true, innerHTML: el.innerHTML };
-        db.storeKey(file.path, value, file.stat.mtime, false);
+        if (
+          !el.innerHTML.includes("pdf-embed") &&
+          !el.innerHTML.includes("pdf-viewer")
+        ) {
+          const value = { ...entry, rendered: true, innerHTML: el.innerHTML };
+          db.storeKey(file.path, value, file.stat.mtime, false);
+        }
         setCached(false);
       }
 
