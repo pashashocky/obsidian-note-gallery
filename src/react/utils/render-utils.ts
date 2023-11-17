@@ -67,7 +67,8 @@ export const useRenderMarkdown = (entry: dbHTMLEntry, file: TFile) => {
         el = await renderMarkdown(app, sourcePath, component, entry.markdown);
         if (
           !el.innerHTML.includes("pdf-embed") &&
-          !el.innerHTML.includes("pdf-viewer")
+          !el.innerHTML.includes("pdf-viewer") &&
+          !el.innerHTML.includes("block-language-note-gallery")
         ) {
           const value = { ...entry, rendered: true, innerHTML: el.innerHTML };
           db.storeKey(file.path, value, file.stat.mtime, false);

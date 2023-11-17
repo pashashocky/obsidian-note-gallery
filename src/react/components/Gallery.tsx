@@ -1,14 +1,31 @@
 import { TFile } from "obsidian";
+import { useState } from "preact/hooks";
 
 import Masonry from "~/react/masonry";
 import Card from "~/react/components/Card";
 import CardMarkdownContent from "~/react/components/CardMarkdownContent";
 import Loader from "~/react/components/Loader";
+import { useFiles } from "~/react/utils/use-files";
 import { useAppMount } from "~/react/context/app-mount-provider";
 import { getResourcePath } from "~/react/utils/render-utils";
-import { useState } from "preact/hooks";
 
-export default function Gallery({ files }: { files: TFile[] }) {
+const Error = ({ error }: { error: string }) => {
+  return (
+    <p
+      style={{
+        borderRadius: "4px",
+        padding: "2px 16px",
+        backgroundColor: "#e50914",
+        color: "#fff",
+        fontWeight: "bolder",
+      }}
+    >
+      (Error) Note Gallery: {error}
+    </p>
+  );
+};
+
+export default function Gallery() {
   const { app } = useAppMount();
   const breakpointColumnsObj = {
     default: 4,
@@ -22,9 +39,11 @@ export default function Gallery({ files }: { files: TFile[] }) {
     1000: 4,
     700: 3,
     400: 2,
+    200: 1,
   };
 
   const itemsPerPage = 300;
+  const { error, files } = useFiles();
   const [hasMore, setHasMore] = useState(true);
   const [numRendered, setNumRendered] = useState(itemsPerPage);
 
@@ -61,14 +80,17 @@ export default function Gallery({ files }: { files: TFile[] }) {
 
   return (
     <div>
-      <Masonry
-        breakpointCols={breakpointColumnsObj}
-        className="masonry-grid"
-        columnClassName="masonry-grid_column"
-      >
-        {renderFiles(files)}
-        <Loader hasMore={hasMore} loadMore={loadMore} />
-      </Masonry>
+      {error && <Error error={error} />}
+      {files.length > 0 && (
+        <Masonry
+          breakpointCols={breakpointColumnsObj}
+          className="masonry-grid"
+          columnClassName="masonry-grid_column"
+        >
+          {renderFiles(files)}
+          <Loader hasMore={hasMore} loadMore={loadMore} />
+        </Masonry>
+      )}
     </div>
   );
 }

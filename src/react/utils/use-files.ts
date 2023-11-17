@@ -1,14 +1,8 @@
-import {
-  App,
-  TFolder,
-  TFile,
-  FileStats,
-  TAbstractFile,
-  Vault,
-  MarkdownPostProcessorContext,
-} from "obsidian";
+import { App, TFolder, TFile, FileStats, TAbstractFile, Vault } from "obsidian";
+import { useEffect, useState } from "preact/hooks";
+
 import { Settings } from "~/code-block/settings";
-import renderError from "~/code-block/errors";
+import { useAppMount } from "../context/app-mount-provider";
 
 type InsensitiveVault = Vault & {
   getAbstractFileByPathInsensitive?: null | ((path: string) => TAbstractFile | null);
@@ -35,24 +29,18 @@ const getPath = (app: App, path: string) => {
   return vault.getAbstractFileByPath(path);
 };
 
-const getFileList = (
-  app: App,
-  ctx: MarkdownPostProcessorContext,
-  container: HTMLElement,
-  settings: Settings,
-) => {
+const getFileList = (app: App, sourcePath: string, settings: Settings) => {
   // retrieve a list of files in the settings.path
   // and if specified by settings.recursive fetch the files
   // in all the subfolders.
   const folder = getPath(app, settings.path);
   if (!(folder instanceof TFolder)) {
     const error = "The folder doesn't exist, or is empty!";
-    renderError(container, error);
-    throw new Error(error);
+    return { files: [], error };
   }
   const files = getFilesRecursive(folder.children, settings.recursive)
     .filter(
-      file => file.path !== ctx.sourcePath && VALID_EXTENSIONS.includes(file.extension),
+      file => file.path !== sourcePath && VALID_EXTENSIONS.includes(file.extension),
     )
     .sort((a: TFile, b: TFile) => {
       const refA =
@@ -66,7 +54,37 @@ const getFileList = (
       const sort = settings.sort === "asc" ? -1 : 1;
       return refA < refB ? sort : refA > refB ? sort * -1 : 0;
     });
-  return settings.limit === 0 ? files : files.splice(0, settings.limit);
+  return {
+    files: settings.limit === 0 ? files : files.splice(0, settings.limit),
+    error: null,
+  };
 };
 
-export default getFileList;
+export const useFiles = () => {
+  const { app, sourcePath, settings } = useAppMount();
+  const [error, setError] = useState<string | null>(null);
+  const [files, setFiles] = useState<TFile[]>([]);
+
+  useEffect(() => {
+    const reloadFiles = () => {
+      const { files, error } = getFileList(app, sourcePath, settings);
+      setError(error);
+      setFiles(files);
+    };
+    if (!files.length) reloadFiles();
+
+    const reload = () => reloadFiles();
+    app.vault.on("modify", reload);
+    app.vault.on("create", reload);
+    app.vault.on("delete", reload);
+    app.vault.on("rename", reload);
+    return () => {
+      app.vault.off("modify", reload);
+      app.vault.off("create", reload);
+      app.vault.off("delete", reload);
+      app.vault.off("rename", reload);
+    };
+  }, [app, sourcePath, settings, files.length]);
+
+  return { error, files };
+};

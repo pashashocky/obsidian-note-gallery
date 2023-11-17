@@ -33,7 +33,14 @@ const getSettings = (
   container: HTMLElement,
   ctx: MarkdownPostProcessorContext,
 ) => {
-  let settingsSrc: AnyObject = parseYaml(src);
+  let settingsSrc: AnyObject | undefined = undefined;
+  try {
+    settingsSrc = parseYaml(src);
+  } catch (e) {
+    const error = "Cannot parse YAML!";
+    renderError(container, error);
+    throw new Error(error);
+  }
   if (settingsSrc === undefined) {
     const error = "Cannot parse YAML!";
     renderError(container, error);
