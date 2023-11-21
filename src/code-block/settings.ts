@@ -8,6 +8,7 @@ export interface Settings {
   sort: "asc" | "desc";
   sortby: "name" | "mtime" | "ctime";
   fontsize: string;
+  showtitle: boolean;
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -17,6 +18,7 @@ const DEFAULT_SETTINGS: Settings = {
   sort: "desc",
   sortby: "mtime",
   fontsize: "6pt",
+  showtitle: true,
 };
 
 type AnyObject = { [key: string]: AnyObject };

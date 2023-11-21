@@ -21,7 +21,7 @@ export interface ContentI {
 export default function CardMarkdownContentRenderer(
   props: CardMarkdownContentRendererProps,
 ) {
-  const { db } = useAppMount();
+  const { db, settings } = useAppMount();
   const { file } = props;
 
   const fileCache = db.getItem(file.path)!;
@@ -38,11 +38,13 @@ export default function CardMarkdownContentRenderer(
   return (
     <Fragment>
       <div ref={ref}>
-        <hr
-          style={{
-            borderTop: cached ? "" : "1px solid var(--interactive-accent-tint)",
-          }}
-        />
+        {settings.showtitle && (
+          <hr
+            style={{
+              borderTop: cached ? "" : "1px solid var(--interactive-accent-tint)",
+            }}
+          />
+        )}
         <div
           style={{
             opacity: isVisible ? 1 : 0,
