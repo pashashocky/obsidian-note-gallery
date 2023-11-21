@@ -48,6 +48,7 @@
     "localforage": "^1.10.0",
     "localforage-getitems": "^1.4.2",
     "localforage-setitems": "^1.4.0",
+    "monkey-around": "^2.3.0",
     "preact": "^10.18.2"
   }
 }

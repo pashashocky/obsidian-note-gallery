@@ -1,8 +1,16 @@
 import { EditorState } from "@codemirror/state";
-import { Plugin, TFile } from "obsidian";
+import {
+  Plugin,
+  TFile,
+  Component,
+  EmbeddedSearchClass,
+  MarkdownRenderer,
+} from "obsidian";
 import CodeBlockNoteGallery from "~/code-block";
+import { around } from "monkey-around";
 
 import { Database } from "~/index/database";
+import { renderMarkdown } from "~/react/utils/render-utils";
 
 export interface dbHTMLEntry {
   text: string | null;
@@ -52,12 +60,42 @@ function loadValue(data: dbHTMLEntry): dbHTMLEntry {
 }
 
 export default class NoteGalleryPlugin extends Plugin {
+  public EmbeddedSearch: typeof EmbeddedSearchClass | null = null;
   public db: Database<dbHTMLEntry>;
   /**
    * Called on plugin load.
    * This can be when the plugin is enabled or Obsidian is first opened.
    */
   async onload() {
+    // The only way to obtain the EmbeddedSearch class is to catch it while it's being added to a parent component
+    // The following will patch Component.addChild and will remove itself once it finds and patches EmbeddedSearch
+    const plugin = this;
+    this.register(
+      around(Component.prototype, {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        addChild(old: any) {
+          return function (child: unknown, ...args: never[]) {
+            try {
+              if (
+                plugin.EmbeddedSearch === null &&
+                child instanceof Component &&
+                child.hasOwnProperty("searchQuery") &&
+                child.hasOwnProperty("sourcePath") &&
+                child.hasOwnProperty("dom")
+              ) {
+                plugin.EmbeddedSearch = child.constructor as typeof EmbeddedSearchClass;
+                console.log({ ES: plugin.EmbeddedSearch });
+              }
+            } catch (err) {
+              console.log(err);
+            }
+            const result = old.call(this, child, ...args);
+            return result;
+          };
+        },
+      }),
+    );
+
     this.db = new Database(
       this,
       "note-gallery-render-store",

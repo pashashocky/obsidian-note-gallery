@@ -1,4 +1,10 @@
-import { App, MarkdownPostProcessorContext, MarkdownRenderChild } from "obsidian";
+import {
+  App,
+  MarkdownPostProcessorContext,
+  MarkdownPreviewRenderer,
+  MarkdownRenderChild,
+  MarkdownRenderer,
+} from "obsidian";
 import { render } from "preact";
 
 import NoteGalleryPlugin from "~/main";
@@ -30,6 +36,15 @@ export default class CodeBlockNoteGallery extends MarkdownRenderChild {
         db={this.plugin.db}
       />,
       this.containerEl,
+    );
+    console.log({ es: this.plugin.EmbeddedSearch });
+    this.addChild(
+      new this.plugin.EmbeddedSearch(
+        this.app,
+        this.containerEl,
+        "query",
+        this.ctx.sourcePath,
+      ),
     );
   }
 

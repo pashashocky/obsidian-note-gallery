@@ -11,4 +11,11 @@ declare module "obsidian" {
   interface Editor {
     cm: CodeMirror.Editor;
   }
+
+  class EmbeddedSearchClass extends MarkdownRenderChild {
+    constructor(app: App, el: HTMLElement, query: string, sourcePath: string);
+    dom?: SearchResult;
+    onunload(): void;
+    onload(): void;
+  }
 }
