@@ -1,16 +1,24 @@
 import { EditorState } from "@codemirror/state";
+import { around } from "monkey-around";
 import {
-  Plugin,
-  TFile,
   Component,
   EmbeddedSearchClass,
-  MarkdownRenderer,
+  EmbeddedSearchDOMClass,
+  MarkdownView,
+  Plugin,
+  TFile,
+  Workspace,
+  WorkspaceLeaf,
+  WorkspaceSplit,
 } from "obsidian";
-import CodeBlockNoteGallery from "~/code-block";
-import { around } from "monkey-around";
 
+import CodeBlockNoteGallery from "~/code-block";
 import { Database } from "~/index/database";
-import { renderMarkdown } from "~/react/utils/render-utils";
+
+type ConstructableWorkspaceSplit = new (
+  ws: Workspace,
+  dir: "horizontal" | "vertical",
+) => WorkspaceSplit;
 
 export interface dbHTMLEntry {
   text: string | null;
@@ -60,54 +68,23 @@ function loadValue(data: dbHTMLEntry): dbHTMLEntry {
 }
 
 export default class NoteGalleryPlugin extends Plugin {
+  public EmbeddedSearchLeafInitializer: WorkspaceLeaf | null = null;
   public EmbeddedSearch: typeof EmbeddedSearchClass | null = null;
+  public isEmbeddedSearchPatched = false;
   public db: Database<dbHTMLEntry>;
+
   /**
    * Called on plugin load.
    * This can be when the plugin is enabled or Obsidian is first opened.
    */
   async onload() {
-    // The only way to obtain the EmbeddedSearch class is to catch it while it's being added to a parent component
-    // The following will patch Component.addChild and will remove itself once it finds and patches EmbeddedSearch
-    const plugin = this;
-    this.register(
-      around(Component.prototype, {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        addChild(old: any) {
-          return function (child: unknown, ...args: never[]) {
-            try {
-              if (
-                plugin.EmbeddedSearch === null &&
-                child instanceof Component &&
-                child.hasOwnProperty("searchQuery") &&
-                child.hasOwnProperty("sourcePath") &&
-                child.hasOwnProperty("dom")
-              ) {
-                plugin.EmbeddedSearch = child.constructor as typeof EmbeddedSearchClass;
-                console.log({ ES: plugin.EmbeddedSearch });
-              }
-            } catch (err) {
-              console.log(err);
-            }
-            const result = old.call(this, child, ...args);
-            return result;
-          };
-        },
-      }),
-    );
+    this.db = this.registerDb();
+    this.patchCatchEmbeddedSearch();
+    this.app.workspace.onLayoutReady(async () => {
+      await this.triggerEmbeddedSearchPatch();
+    });
 
-    this.db = new Database(
-      this,
-      "note-gallery-render-store",
-      "Render Store",
-      1,
-      "Stores text and renderedHTML of a file to be rendered by the note gallery",
-      () => DEFAULT_DB_ENTRY,
-      extractValue,
-      2,
-      loadValue,
-    );
-    this.registerMarkdownCodeBlockProcessor("note-gallery", (src, el, ctx) => {
+    this.registerMarkdownCodeBlockProcessor("note-gallery", async (src, el, ctx) => {
       const handler = new CodeBlockNoteGallery(this, src, el, this.app, ctx);
       ctx.addChild(handler);
     });
@@ -118,4 +95,101 @@ export default class NoteGalleryPlugin extends Plugin {
    * This can be when the plugin is disabled or Obsidian is closed.
    */
   async onunload() {}
+
+  registerDb() {
+    return new Database(
+      this,
+      "note-gallery-render-store",
+      "Render Store",
+      1,
+      "Stores text and renderedHTML of a file to be rendered by the note gallery",
+      () => DEFAULT_DB_ENTRY,
+      extractValue,
+      2,
+      loadValue,
+    );
+  }
+
+  patchCatchEmbeddedSearch() {
+    // The only way to obtain the EmbeddedSearch class is to catch it while it's being added to a parent component
+    // The following will patch Component.addChild and will remove itself once it finds and patches EmbeddedSearch
+    const plugin = this;
+    plugin.register(
+      around(Component.prototype, {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        addChild(old: any) {
+          return function (this: Component, child: unknown, ...args: never[]) {
+            try {
+              if (
+                !plugin.isEmbeddedSearchPatched &&
+                child instanceof Component &&
+                child.hasOwnProperty("searchQuery") &&
+                child.hasOwnProperty("sourcePath") &&
+                child.hasOwnProperty("dom")
+              ) {
+                const embeddedSearch = child as EmbeddedSearchClass;
+                plugin.patchEmbeddedSearch(embeddedSearch);
+                plugin.isEmbeddedSearchPatched = true;
+              }
+            } catch (err) {
+              console.log(err);
+            }
+            const result = old.call(this, child, ...args);
+            return result;
+          };
+        },
+      }),
+    );
+  }
+
+  patchEmbeddedSearch(embeddedSearch: EmbeddedSearchClass) {
+    const plugin = this;
+
+    plugin.EmbeddedSearch = embeddedSearch.constructor as typeof EmbeddedSearchClass;
+    setTimeout(() => {
+      plugin.EmbeddedSearchLeafInitializer?.detach();
+      plugin.EmbeddedSearchLeafInitializer = null;
+    }, 1000);
+
+    const EmbeddedSearchDOM = embeddedSearch.dom!
+      .constructor as typeof EmbeddedSearchDOMClass;
+    plugin.patchEmbeddedSearchDOM(EmbeddedSearchDOM);
+  }
+
+  patchEmbeddedSearchDOM(EmbeddedSearchDOM: typeof EmbeddedSearchDOMClass) {
+    const plugin = this;
+    plugin.register(
+      around(EmbeddedSearchDOM.prototype, {
+        // TODO: need to patch startLoader for sorting
+        // https://github.com/nothingislost/obsidian-query-control/blob/master/src/main.ts#L415
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        onChange(old: any) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          return function (this: EmbeddedSearchDOMClass, ...args: any[]) {
+            const result = old.call(this, ...args);
+            plugin.app.workspace.trigger("search:onChange", this);
+            return result;
+          };
+        },
+      }),
+    );
+  }
+
+  async triggerEmbeddedSearchPatch() {
+    const rootSplit: WorkspaceSplit =
+      new (WorkspaceSplit as ConstructableWorkspaceSplit)(
+        this.app.workspace,
+        "vertical",
+      );
+    const leaf = (this.EmbeddedSearchLeafInitializer = this.attachLeaf(rootSplit));
+    const textFile = new MarkdownView(leaf);
+    textFile.setViewData("```query\n```", true);
+    await leaf.open(textFile);
+  }
+
+  attachLeaf(rootSplit: WorkspaceSplit): WorkspaceLeaf {
+    rootSplit.getRoot = () => this.app.workspace["rootSplit"]!;
+    rootSplit.getContainer = () => this.app.workspace.rootSplit;
+    return this.app.workspace.createLeafInParent(rootSplit, 0);
+  }
 }

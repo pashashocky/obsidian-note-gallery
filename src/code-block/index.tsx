@@ -1,10 +1,4 @@
-import {
-  App,
-  MarkdownPostProcessorContext,
-  MarkdownPreviewRenderer,
-  MarkdownRenderChild,
-  MarkdownRenderer,
-} from "obsidian";
+import { App, MarkdownPostProcessorContext, MarkdownRenderChild } from "obsidian";
 import { render } from "preact";
 
 import NoteGalleryPlugin from "~/main";
@@ -13,6 +7,7 @@ import getSettings, { Settings } from "~/code-block/settings";
 
 export default class CodeBlockNoteGallery extends MarkdownRenderChild {
   private settings: Settings;
+  private reactEl: HTMLElement;
 
   constructor(
     public plugin: NoteGalleryPlugin,
@@ -26,29 +21,38 @@ export default class CodeBlockNoteGallery extends MarkdownRenderChild {
   }
 
   async onload() {
-    render(
-      <NoteGalleryApp
-        app={this.app}
-        component={this}
-        containerEl={this.containerEl}
-        sourcePath={this.ctx.sourcePath}
-        settings={this.settings}
-        db={this.plugin.db}
-      />,
-      this.containerEl,
-    );
-    console.log({ es: this.plugin.EmbeddedSearch });
-    this.addChild(
-      new this.plugin.EmbeddedSearch(
-        this.app,
-        this.containerEl,
-        "query",
-        this.ctx.sourcePath,
-      ),
-    );
+    this.plugin.app.workspace.onLayoutReady(() => {
+      const searchEl = this.containerEl.createEl("div");
+      this.reactEl = this.containerEl.createEl("div");
+
+      if (!this.settings.debugquery) searchEl.style.display = "none";
+      searchEl.style.height = "500px";
+      searchEl.style.overflowY = "scroll";
+
+      const embeddedSearch = this.addChild(
+        new this.plugin.EmbeddedSearch!(
+          this.app,
+          searchEl,
+          this.settings.query,
+          this.ctx.sourcePath,
+        ),
+      );
+      render(
+        <NoteGalleryApp
+          app={this.app}
+          component={this}
+          containerEl={this.reactEl}
+          sourcePath={this.ctx.sourcePath}
+          settings={this.settings}
+          embeddedSearch={embeddedSearch}
+          db={this.plugin.db}
+        />,
+        this.reactEl,
+      );
+    });
   }
 
   async onunload() {
-    render(null, this.containerEl);
+    render(null, this.reactEl);
   }
 }
