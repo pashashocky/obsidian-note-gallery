@@ -7,18 +7,6 @@
   /* --note-card-font-size: 4pt; configured in react/index.tsx */
 }
 
-:root body.theme-light {
-  --note-card-border-color: #e5e6e9;
-  --inline-title-color: #272727;
-  --hr-color: #f2f2f2;
-}
-
-:root body.theme-dark {
-  --note-card-border-color: #333539;
-  --inline-title-color: #dddddd;
-  --hr-color: #2d2d2d;
-}
-
 .masonry-grid {
   display: -webkit-box; /* Not needed if autoprefixing */
   display: -ms-flexbox; /* Not needed if autoprefixing */
@@ -49,7 +37,8 @@
   max-height: 330px;
   padding: 10px;
   border-radius: 5px;
-  border: 1px solid var(--note-card-border-color);
+  background-color: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
   overflow: hidden;
   cursor: pointer;
 }
@@ -59,7 +48,7 @@
 }
 
 .note-card hr {
-  border-top: 1px solid var(--hr-color);
+  border-top: 1px solid var(--background-secondary);
   margin-top: 0.4rem !important;
   margin-bottom: 0.4rem !important;
 }
@@ -68,7 +57,7 @@
   display: block;
   font-size: 12pt;
   font-weight: 600;
-  color: var(--inline-title-color);
+  color: var(--h3-text-color-lt);
 }
 
 .note-card .card-content {
@@ -91,6 +80,10 @@
 }
 
 /* Styling of external elements */
+
+.view-content:has(div):has(.block-language-note-gallery) {
+  background-color: var(--background-secondary) !important;
+}
 
 .cm-embed-block:has(> div.block-language-note-gallery):hover {
   box-shadow: unset !important;
