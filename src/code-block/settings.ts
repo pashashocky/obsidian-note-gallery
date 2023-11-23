@@ -3,22 +3,26 @@ import renderError from "~/code-block/errors";
 
 export interface Settings {
   path: string;
+  query: string;
   limit: number;
   recursive: boolean;
   sort: "asc" | "desc";
   sortby: "name" | "mtime" | "ctime";
   fontsize: string;
   showtitle: boolean;
+  debugquery: boolean;
 }
 
 const DEFAULT_SETTINGS: Settings = {
   path: "",
+  query: "",
   limit: 0,
   recursive: true,
   sort: "desc",
   sortby: "mtime",
   fontsize: "6pt",
   showtitle: true,
+  debugquery: false,
 };
 
 type AnyObject = { [key: string]: AnyObject };
@@ -41,7 +45,7 @@ const getSettings = (
   } catch (e) {
     const error = "Cannot parse YAML!";
     renderError(container, error);
-    throw new Error(error);
+    throw e;
   }
   if (settingsSrc === undefined) {
     const error = "Cannot parse YAML!";
@@ -54,12 +58,13 @@ const getSettings = (
   }
 
   const settings = { ...DEFAULT_SETTINGS, ...settingsSrc };
-  if (settingsSrc === null || !settingsSrc.path) {
+  if (settingsSrc === null || (!settingsSrc.path && !settingsSrc.query)) {
     const file = app.vault.getAbstractFileByPath(ctx.sourcePath)!.parent!;
     settings.path = file.path;
   }
-  settings.path = normalizePath(settings.path);
-
+  if (settings.path) settings.path = normalizePath(settings.path);
+  if (!settings.path) settings.path = "";
+  if (!settings.query) settings.query = "";
   return settings;
 };
 
