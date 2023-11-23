@@ -43,7 +43,8 @@ const getSettings = (
   try {
     settingsSrc = parseYaml(src);
   } catch (e) {
-    const error = "Cannot parse YAML!";
+    let error = "Cannot parse YAML!";
+    if (e instanceof Error) error = e.message;
     renderError(container, error);
     throw e;
   }
