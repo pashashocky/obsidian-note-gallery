@@ -3,11 +3,11 @@ const renderError = (container: HTMLElement, error: string) => {
   const wrapper = container.createEl("div");
   wrapper.createEl("p", { text: `(Error) Note Gallery: ${error}` });
 
-  wrapper.style.borderRadius = "4px";
-  wrapper.style.padding = "2px 16px";
-  wrapper.style.backgroundColor = "#e50914";
-  wrapper.style.color = "#fff";
-  wrapper.style.fontWeight = "bolder";
+  wrapper.style.borderRadius = "var(--callout-radius)";
+  wrapper.style.padding = "var(--callout-padding)";
+  wrapper.style.backgroundColor = "var(--background-modifier-error)";
+  wrapper.style.color = "var(--text-on-accent-inverted)";
+  wrapper.style.fontWeight = "var(--font-bold)";
 };
 
 export default renderError;

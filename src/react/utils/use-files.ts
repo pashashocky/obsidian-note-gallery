@@ -48,7 +48,7 @@ const getFileList = (app: App, settings: Settings) => {
   const folder = getPath(app, settings.path);
   if (!(folder instanceof TFolder)) {
     if (settings.path && settings.path !== "")
-      error = "The folder doesn't exist, or is empty!";
+      error = "The folder specified in `path` doesn't exist!";
     return { files: [], error };
   }
   return { files: getFilesRecursive(folder.children, settings.recursive), error };

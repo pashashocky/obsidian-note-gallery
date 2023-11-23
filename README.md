@@ -14,6 +14,13 @@ Note Gallery is a masonry style note gallery for [Obsidian](https://obsidian.md/
 - Displays notes or images using a masonry gallery by defining a code block in your note. Similar to "Safari overview mode" or "Craft-like folder view".
   - [x] Opimized the loading of markdown cards through caching.
   - [x] CRUD operations update the gallery.
+- Variety of filtering and searching options
+  - [x] `query` supports native obsidian search syntax! For example:
+    - `query: '/(Regex: \d)/'`
+    - `query: tag:#mytag`
+    - `query: 'path: abc/deb OR path: atlas/notes'`
+    - `query: path:abc/deb OR path:atlas/notes` - notice the spacing differences without quotes
+  - [x] `path` can be used to select an individual folder or recursively collect it
 - Has options for sorting, limiting # of results and recursively scanning folders.
 
 ## Work in Progress
@@ -30,11 +37,16 @@ Note Gallery is a masonry style note gallery for [Obsidian](https://obsidian.md/
 4. Enable the `Note Gallery` plugin in the `Community Plugins` tab in settings
 5. Create a code block similar to the below in any of your notes
 
+
+## Example Syntax
 ```
 ~~~~note-gallery     #           default | options
-path: Atlas          # optional: current note folder | path/to/folder
-limit: 10            # optional: 0 | any number
+query: 'tag:#mytag'  # optional: anything you'd put into an obsidian search query
+                     # make sure to wrap into single quotes for any regex e.g.: '/\d/'
+debugQuery: false    # optional: false | true - display native search results to debug
+path: atlas          # optional: current note folder | path/to/folder
 recursive: true      # optional: true | false
+limit: 10            # optional: 0 | any number
 sort: desc           # optional: desc | asc
 sortBy: mtime        # optional: mtime | ctime | name
 fontSize: 6pt        # optional: 6pt | NUMBERpt | NUMBERpx
