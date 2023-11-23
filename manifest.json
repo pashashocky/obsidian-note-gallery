@@ -1,10 +1,14 @@
 {
-	"id": "obsidian-note-gallery",
-	"name": "Note Gallery",
-	"version": "0.0.34",
-	"minAppVersion": "1.2.0",
-	"description": "A masonry note gallery for Obsidian.",
-	"author": "Pash Shocky",
-	"authorUrl": "https://github.com/pashashocky",
-	"isDesktopOnly": false
+  "id": "note-gallery",
+  "name": "Note Gallery",
+  "version": "0.0.34",
+  "minAppVersion": "1.2.0",
+  "description": "A masonry gallery for Obsidian that will visualize your notes, similar to Craft note view.",
+  "author": "Pash Shocky",
+  "authorUrl": "https://github.com/pashashocky",
+  "isDesktopOnly": false,
+  "fundingUrl": {
+    "Buy Me a Coffee": "https://www.buymeacoffee.com/pashashocky",
+    "GitHub Sponsor": "https://github.com/sponsors/pashashocky"
+  }
 }
