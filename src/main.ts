@@ -140,7 +140,7 @@ export default class NoteGalleryPlugin extends Plugin {
                 plugin.isEmbeddedSearchPatched = true;
               }
             } catch (err) {
-              console.log(err);
+              console.log({ type: "Patching CatchEmbeddedSearch Error", err });
             }
             const result = old.call(this, child, ...args);
             return result;
@@ -152,6 +152,8 @@ export default class NoteGalleryPlugin extends Plugin {
 
   patchEmbeddedSearch(embeddedSearch: EmbeddedSearchClass) {
     const plugin = this;
+    const EmbeddedSearchDOM = embeddedSearch.dom!
+      .constructor as typeof EmbeddedSearchDOMClass;
 
     plugin.EmbeddedSearch = embeddedSearch.constructor as typeof EmbeddedSearchClass;
     setTimeout(() => {
@@ -159,8 +161,23 @@ export default class NoteGalleryPlugin extends Plugin {
       plugin.EmbeddedSearchLeafInitializer = null;
     }, 1000);
 
-    const EmbeddedSearchDOM = embeddedSearch.dom!
-      .constructor as typeof EmbeddedSearchDOMClass;
+    this.register(
+      around(embeddedSearch.constructor.prototype, {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        onload(old: any) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          return function (this: EmbeddedSearchClass, ...args: any[]) {
+            try {
+              if (this.dom) this.dom.parent = this;
+            } catch (err) {
+              console.log({ type: "Patching EmbeddedSearch Error", err });
+            }
+            return old.call(this, ...args);
+          };
+        },
+      }),
+    );
+
     plugin.patchEmbeddedSearchDOM(EmbeddedSearchDOM);
   }
 
@@ -174,8 +191,12 @@ export default class NoteGalleryPlugin extends Plugin {
         onChange(old: any) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           return function (this: EmbeddedSearchDOMClass, ...args: any[]) {
+            try {
+              plugin.app.workspace.trigger("search:onChange", this);
+            } catch (err) {
+              console.log({ type: "Patching EmbeddedSearchDOM Error", err });
+            }
             const result = old.call(this, ...args);
-            plugin.app.workspace.trigger("search:onChange", this);
             return result;
           };
         },
