@@ -1,6 +1,6 @@
 {
   "name": "obsidian-note-gallery",
-  "version": "0.0.35",
+  "version": "0.0.36",
   "description": "A masonry note gallery for Obsidian.",
   "main": "main.js",
   "scripts": {
