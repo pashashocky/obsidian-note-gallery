@@ -28,16 +28,6 @@ Note Gallery is a masonry style note gallery for [Obsidian](https://obsidian.md/
 - Interactive view when clicking on folders in the file switcher.
 - Showing currently open tabs as a Masonry gallery.
 
-# Installation Instructions
-## BRAT
-1. Install BRAT from the Community Plugins in Obsidian
-  1.1 Enable the BRAT plugin in the settings
-2. Open the command palette (CMD/CTRL + P) and run the command BRAT: `Add a beta plugin for testing`
-3. Enter the following URL: `https://github.com/pashashocky/obsidian-note-gallery`
-4. Enable the `Note Gallery` plugin in the `Community Plugins` tab in settings
-5. Create a code block similar to the below in any of your notes
-
-
 ## Example Syntax
 ```
 ~~~~note-gallery     #           default | options
@@ -54,3 +44,14 @@ showTitle: true      # optional: true | false
 ~~~~
 ```
 
+# Installation Instructions
+## Community Plugin
+I've submitted an application to be included in obsidian community plugins - [show some love](https://github.com/obsidianmd/obsidian-releases/pull/2684)
+
+## BRAT
+1. Install BRAT from the Community Plugins in Obsidian
+  1.1 Enable the BRAT plugin in the settings
+2. Open the command palette (CMD/CTRL + P) and run the command BRAT: `Add a beta plugin for testing`
+3. Enter the following URL: `https://github.com/pashashocky/obsidian-note-gallery`
+4. Enable the `Note Gallery` plugin in the `Community Plugins` tab in settings
+5. Create a code block similar to the below in any of your notes
