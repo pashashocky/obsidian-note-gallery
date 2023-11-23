@@ -7,9 +7,6 @@ import { extendPrototype as extendPrototypeSet } from "localforage-setitems";
 extendPrototypeSet(localforage);
 extendPrototypeGet(localforage);
 
-// // @ts-expect-error (if somebody knows how to get rid of this TS error, please do share, allowSyntheticDefaultImports does not work)
-// import Worker from "./database.worker";
-
 export type DatabaseItem<T> = { data: T; mtime: number };
 export type DatabaseEntry<T> = [string, DatabaseItem<T>];
 
