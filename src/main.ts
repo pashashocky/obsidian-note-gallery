@@ -88,6 +88,14 @@ export default class NoteGalleryPlugin extends Plugin {
       const handler = new CodeBlockNoteGallery(this, src, el, this.app, ctx);
       ctx.addChild(handler);
     });
+
+    this.addCommand({
+      id: "note-gallery-drop-database",
+      name: "Drop all caches and re-initialize database.",
+      callback: () => {
+        this.db.reinitializeDatabase();
+      },
+    });
   }
 
   /**
