@@ -70,7 +70,8 @@ const filterFileList = (
       if (f.extension !== "md") {
         return true;
       }
-      const fileCache = db.getItem(f.path)!;
+      const fileCache = db.getItem(f.path);
+      if (!fileCache) return false;
       const { data } = fileCache;
       if (!data.markdown || !data.hasMarkdown) {
         return false;
@@ -185,9 +186,12 @@ export const useFiles = () => {
     if (!files.length) reloadFiles(embeddedSearch.dom, true);
 
     const debouncedReloadFiles = debounce(reloadFiles, DEBOUNCE_TIMEOUT, true);
+    const ready = () => debouncedReloadFiles(embeddedSearch.dom, true);
     app.workspace.on("search:onChange", debouncedReloadFiles);
+    db.on("database-update", ready);
     return () => {
       app.workspace.off("search:onChange", debouncedReloadFiles);
+      db.off("database-update", ready);
     };
   });
 

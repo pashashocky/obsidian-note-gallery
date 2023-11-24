@@ -85,6 +85,7 @@ export class Database<T> extends EventComponent {
     ctx?: unknown,
   ): EventRef;
   public on(name: "database-migrate", callback: () => void, ctx?: unknown): EventRef;
+  public on(name: "database-drop", callback: () => void, ctx?: unknown): EventRef;
 
   on(name: string, callback: (...args: never[]) => void, ctx?: unknown): EventRef {
     return super.on(name, callback, ctx);
@@ -403,6 +404,7 @@ export class Database<T> extends EventComponent {
    * Clear in-memory cache, and completely remove database from indexedDB (and all references in localStorage)
    */
   async dropDatabase() {
+    this.trigger("database-drop");
     this.memory.clear();
     await localforage.dropInstance({
       name: this.name + `/${this.plugin.app.appId}`,
@@ -432,6 +434,7 @@ export class Database<T> extends EventComponent {
    * Clear in-memory cache, and clear database contents from indexedDB
    */
   async clearDatabase() {
+    this.trigger("database-drop");
     this.memory.clear();
     await this.persist.clear();
   }

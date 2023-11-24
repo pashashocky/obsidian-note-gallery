@@ -31,10 +31,13 @@ export default function NoteGalleryApp({
     containerEl.style.setProperty("--note-card-font-size", settings.fontsize);
 
     const ready = () => setDatabaseReady(true);
+    const notReady = () => setDatabaseReady(false);
     if (db.ready) ready();
     db.on("database-update", ready);
+    db.on("database-drop", notReady);
     return () => {
       db.off("database-update", ready);
+      db.off("database-drop", notReady);
     };
   }, [db, settings.fontsize, containerEl]);
 
@@ -49,7 +52,7 @@ export default function NoteGalleryApp({
     >
       {!databaseReady && (
         <div>
-          <h1>Note Gallery: Loading...</h1>
+          <h1>Note Gallery: Indexing Database...</h1>
         </div>
       )}
       {databaseReady && <Gallery />}
