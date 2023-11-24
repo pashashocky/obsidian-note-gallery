@@ -91,7 +91,7 @@ export default class NoteGalleryPlugin extends Plugin {
 
     this.addCommand({
       id: "note-gallery-drop-database",
-      name: "Drop all caches and re-initialize database.",
+      name: "Drop all caches and re-initialize database",
       callback: () => {
         this.db.reinitializeDatabase();
       },
