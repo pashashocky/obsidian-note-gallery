@@ -95,10 +95,15 @@
 
 .note-card .callout {
   min-height: unset;
+  padding: 0;
 }
 
 .note-card .callout-title {
   min-height: unset !important;
+}
+
+.note-card .callout-title-inner {
+  padding: var(--size-2-1) 0;
 }
 
 .note-card .callout-content {
@@ -109,6 +114,10 @@
 .note-card svg.svg-icon {
   height: 8px;
   width: 8px;
+}
+
+.note-card li img {
+  max-width: 100% !important;
 }
 
 .note-card .video-wrapper {
