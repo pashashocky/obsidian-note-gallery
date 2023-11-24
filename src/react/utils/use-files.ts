@@ -93,6 +93,42 @@ const filterFileList = (
   return settings.limit === 0 ? filteredFiles : filteredFiles.splice(0, settings.limit);
 };
 
+const getSortOrder = (settings: Settings) => {
+  const order = `${settings.sortby}:${settings.sort}`;
+  switch (order) {
+    case "mtime:desc":
+      return "byModifiedTime";
+    case "mtime:asc":
+      return "byModifiedTimeReverse";
+    case "ctime:desc":
+      return "byCreatedTime";
+    case "ctime:asc":
+      return "byCreatedTimeReverse";
+    case "name:desc":
+      return "alphabeticalReverse";
+    case "name:asc":
+      return "alphabetical";
+    default:
+      return "byModifiedTime";
+  }
+};
+
+const adjustStyle = (local: EmbeddedSearchDOMClass | undefined, settings: Settings) => {
+  if (!local) return;
+  if (settings.debugquery) {
+    local.el.style.height = "300px";
+    local.el.style.padding = "10px";
+    local.el.style.marginBottom = "12px";
+    local.el.style.border = "1px solid var(--background-modifier-border)";
+    local.el.style.borderRadius = "5px";
+  } else {
+    local.el.style.height = "8px";
+    const fc = local.el.firstChild;
+    if (fc) (fc as HTMLDivElement).style.display = "none";
+  }
+  local.el.style.removeProperty("display");
+};
+
 export const useFiles = () => {
   const { app, db, sourcePath, settings, embeddedSearch } = useAppMount();
   const [error, setError] = useState<string | null>(null);
@@ -121,6 +157,9 @@ export const useFiles = () => {
       )
         return [];
 
+      const wantSort = getSortOrder(settings);
+      if (local.sortOrder !== wantSort) local.setSortOrder(wantSort);
+
       const resultDomLookup = update?.resultDomLookup
         ? update.resultDomLookup
         : local?.resultDomLookup;
@@ -128,7 +167,11 @@ export const useFiles = () => {
       return Array.from(resultDomLookup.keys());
     };
 
-    const reloadFiles = (update: EmbeddedSearchDOMClass | undefined) => {
+    const reloadFiles = (
+      update: EmbeddedSearchDOMClass | undefined,
+      style?: boolean,
+    ) => {
+      if (style) adjustStyle(update, settings);
       // deduplicate by file.path, keeping the newest ones
       const allFiles = [...files, ...reloadPathFiles(), ...reloadQueryFiles(update)];
       const newFiles = [...new Map(allFiles.map(file => [file.path, file])).values()];
@@ -137,12 +180,12 @@ export const useFiles = () => {
         setFiles(filteredFiles);
       }
     };
-    const debouncedReloadFiles = debounce(reloadFiles, DEBOUNCE_TIMEOUT, true);
+    if (!files.length) reloadFiles(embeddedSearch.dom, true);
 
-    if (!files.length) debouncedReloadFiles(embeddedSearch.dom);
-    app.workspace.on("search:onChange", reloadFiles);
+    const debouncedReloadFiles = debounce(reloadFiles, DEBOUNCE_TIMEOUT, true);
+    app.workspace.on("search:onChange", debouncedReloadFiles);
     return () => {
-      app.workspace.off("search:onChange", reloadFiles);
+      app.workspace.off("search:onChange", debouncedReloadFiles);
     };
   });
 
