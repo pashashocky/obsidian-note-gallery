@@ -123,8 +123,9 @@ const adjustStyle = (local: EmbeddedSearchDOMClass | undefined, settings: Settin
     local.el.style.borderRadius = "5px";
   } else {
     local.el.style.height = "8px";
+    // no need to keep the match divs around and grow the dom if we are not showing it
     const fc = local.el.firstChild;
-    if (fc) (fc as HTMLDivElement).style.display = "none";
+    if (fc) fc.remove();
   }
   local.el.style.removeProperty("display");
 };
@@ -158,7 +159,8 @@ export const useFiles = () => {
         return [];
 
       const wantSort = getSortOrder(settings);
-      if (local.sortOrder !== wantSort) local.setSortOrder(wantSort);
+      if (local.setSortOrder && local.sortOrder !== wantSort)
+        local.setSortOrder(wantSort);
 
       const resultDomLookup = update?.resultDomLookup
         ? update.resultDomLookup
