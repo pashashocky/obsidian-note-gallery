@@ -148,9 +148,11 @@ export class Database<T> extends EventComponent {
           await this.clearDatabase();
           await this.rebuildDatabase(progress_bar, notice);
           this.trigger("database-migrate");
+          this.trigger("database-update", this.allEntries());
         } else if (this.isEmpty()) {
           await this.rebuildDatabase(progress_bar, notice);
           this.trigger("database-create");
+          this.trigger("database-update", this.allEntries());
         } else {
           await this.syncDatabase(progress_bar, notice);
         }
