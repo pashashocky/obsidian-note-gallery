@@ -57,7 +57,7 @@
   display: block;
   font-size: 12pt;
   font-weight: 600;
-  color: var(--h3-text-color-lt);
+  color: var(--h3-color);
 }
 
 .note-card .card-content {
