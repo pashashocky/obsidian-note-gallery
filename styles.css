@@ -89,6 +89,18 @@
   box-shadow: unset !important;
 }
 
+.note-card li input[type="checkbox"] {
+  height: 8px;
+  width: 8px;
+  margin-inline-end: 3px;
+  margin-inline-start: -12px !important;
+}
+
+.note-card li input[type="checkbox"]:checked:after {
+  height: 8px;
+  width: 8px;
+}
+
 .note-card .markdown-preview-view {
   font-size: var(--note-card-font-size);
 }
