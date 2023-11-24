@@ -185,8 +185,36 @@ export default class NoteGalleryPlugin extends Plugin {
     const plugin = this;
     plugin.register(
       around(EmbeddedSearchDOM.prototype, {
-        // TODO: need to patch startLoader for sorting
-        // https://github.com/nothingislost/obsidian-query-control/blob/master/src/main.ts#L415
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        startLoader(old: any) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          return function (this: EmbeddedSearchDOMClass, ...args: any[]) {
+            try {
+              // are we in a embedded search view?
+              if (
+                !this.patched &&
+                this.el.parentElement?.hasClass("block-language-note-gallery") &&
+                this.el?.closest(".block-language-note-gallery")
+              ) {
+                this.patched = true;
+                this.setSortOrder = (sortType: string) => {
+                  console.log(
+                    `Note Gallery: Setting native search sort order ${sortType}`,
+                  );
+                  this.sortOrder = sortType;
+                  this.changed();
+                  this.infinityScroll.invalidateAll();
+                };
+              }
+            } catch (err) {
+              console.log({
+                type: "Patching EmbeddedSearchDOM.startLoader Error",
+                err,
+              });
+            }
+            return old.call(this, ...args);
+          };
+        },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         onChange(old: any) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -194,10 +222,9 @@ export default class NoteGalleryPlugin extends Plugin {
             try {
               plugin.app.workspace.trigger("search:onChange", this);
             } catch (err) {
-              console.log({ type: "Patching EmbeddedSearchDOM Error", err });
+              console.log({ type: "Patching EmbeddedSearchDOM.onChange Error", err });
             }
-            const result = old.call(this, ...args);
-            return result;
+            return old.call(this, ...args);
           };
         },
       }),

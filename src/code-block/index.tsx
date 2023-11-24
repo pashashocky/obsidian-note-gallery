@@ -25,8 +25,7 @@ export default class CodeBlockNoteGallery extends MarkdownRenderChild {
       const searchEl = this.containerEl.createEl("div");
       this.reactEl = this.containerEl.createEl("div");
 
-      if (!this.settings.debugquery) searchEl.style.display = "none";
-      searchEl.style.height = "500px";
+      searchEl.style.display = "none";
       searchEl.style.overflowY = "scroll";
 
       const embeddedSearch = this.addChild(

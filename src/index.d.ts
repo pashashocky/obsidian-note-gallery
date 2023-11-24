@@ -30,16 +30,21 @@ declare module "obsidian" {
   }
 
   class EmbeddedSearchDOMClass {
-    startLoader(): void;
-    infinityScroll: InfinityScroll;
-    patched: boolean;
-    children: SearchResultItemClass[];
-    resultDomLookup: Map<TFile, SearchResultItemClass>;
-    parent?: EmbeddedSearchClass;
-    onChange(): void;
     addResult(): void;
-    removeResult(): void;
+    changed(): void;
+    children: SearchResultItemClass[];
+    el: HTMLElement;
     emptyResults(): void;
+    infinityScroll: InfinityScroll;
+    onChange(): void;
+    parent?: EmbeddedSearchClass;
+    patched: boolean;
+    removeResult(): void;
+    resultDomLookup: Map<TFile, SearchResultItemClass>;
+    setSortOrder(sortType: string): void;
+    sortOrder: string;
+    startLoader(): void;
+    stopLoader(): void;
   }
 
   class SearchResultItemClass {
