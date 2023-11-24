@@ -80,11 +80,9 @@ export default class NoteGalleryPlugin extends Plugin {
   async onload() {
     this.db = this.registerDb();
     this.patchCatchEmbeddedSearch();
-    this.app.workspace.onLayoutReady(async () => {
-      await this.triggerEmbeddedSearchPatch();
-    });
 
     this.registerMarkdownCodeBlockProcessor("note-gallery", async (src, el, ctx) => {
+      await this.triggerEmbeddedSearchPatch();
       const handler = new CodeBlockNoteGallery(this, src, el, this.app, ctx);
       ctx.addChild(handler);
     });

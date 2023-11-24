@@ -21,34 +21,34 @@ export default class CodeBlockNoteGallery extends MarkdownRenderChild {
   }
 
   async onload() {
-    this.plugin.app.workspace.onLayoutReady(() => {
-      const searchEl = this.containerEl.createEl("div");
-      this.reactEl = this.containerEl.createEl("div");
+    const searchEl = this.containerEl.createEl("div");
+    this.reactEl = this.containerEl.createEl("div");
 
-      searchEl.style.display = "none";
-      searchEl.style.overflowY = "scroll";
+    searchEl.style.display = "none";
+    searchEl.style.overflowY = "scroll";
 
-      const embeddedSearch = this.addChild(
-        new this.plugin.EmbeddedSearch!(
-          this.app,
-          searchEl,
-          this.settings.query,
-          this.ctx.sourcePath,
-        ),
-      );
-      render(
-        <NoteGalleryApp
-          app={this.app}
-          component={this}
-          containerEl={this.reactEl}
-          sourcePath={this.ctx.sourcePath}
-          settings={this.settings}
-          embeddedSearch={embeddedSearch}
-          db={this.plugin.db}
-        />,
-        this.reactEl,
-      );
-    });
+    // better be safe with the native search
+    if (!this.plugin.EmbeddedSearch) await this.plugin.triggerEmbeddedSearchPatch();
+    const embeddedSearch = this.addChild(
+      new this.plugin.EmbeddedSearch!(
+        this.app,
+        searchEl,
+        this.settings.query,
+        this.ctx.sourcePath,
+      ),
+    );
+    render(
+      <NoteGalleryApp
+        app={this.app}
+        component={this}
+        containerEl={this.reactEl}
+        sourcePath={this.ctx.sourcePath}
+        settings={this.settings}
+        embeddedSearch={embeddedSearch}
+        db={this.plugin.db}
+      />,
+      this.reactEl,
+    );
   }
 
   async onunload() {
