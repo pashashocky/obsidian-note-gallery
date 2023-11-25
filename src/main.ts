@@ -42,7 +42,7 @@ export async function extractValue(
   _state?: EditorState,
 ): Promise<dbHTMLEntry> {
   // the idea of the below is to trim the content to the first n linesToKeep
-  const linesToKeep = 50;
+  const linesToKeep = 200;
   let frontmatter = "";
   if (markdown.startsWith("---")) {
     const i = markdown.indexOf("---", 3); // second instance
@@ -107,7 +107,7 @@ export default class NoteGalleryPlugin extends Plugin {
       this,
       "note-gallery-render-store",
       "Render Store",
-      2,
+      3,
       "Stores text and renderedHTML of a file to be rendered by the note gallery",
       () => DEFAULT_DB_ENTRY,
       extractValue,
