@@ -231,7 +231,10 @@ export default class NoteGalleryPlugin extends Plugin {
                 this,
                 matchedFile,
                 matchLoc,
-                matchText.replace("note-gallery", "NOTE_GALLERY"),
+                matchText.replace(
+                  "note-gallery",
+                  "note-gallery".toUpperCase().replace("-", "_"),
+                ),
                 ...args,
               );
               return result;
