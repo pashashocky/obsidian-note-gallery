@@ -117,7 +117,7 @@ const getSortOrder = (settings: Settings) => {
 const adjustStyle = (local: EmbeddedSearchDOMClass | undefined, settings: Settings) => {
   if (!local) return;
   if (settings.debugquery) {
-    local.el.style.height = "300px";
+    local.el.style.maxHeight = "300px";
     local.el.style.padding = "10px";
     local.el.style.marginBottom = "12px";
     local.el.style.border = "1px solid var(--background-modifier-border)";
