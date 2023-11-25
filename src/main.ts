@@ -214,6 +214,32 @@ export default class NoteGalleryPlugin extends Plugin {
           };
         },
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        addResult(old: any) {
+          return function (
+            this: EmbeddedSearchDOMClass,
+            matchedFile: TFile,
+            matchLoc: number[][],
+            matchText: string,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            ...args: any[]
+          ) {
+            let result;
+            if (matchText.contains("note-gallery")) {
+              // needed to prevent recursion of rendering the note-gallery code block
+              // inside any native search results
+              result = old.call(
+                this,
+                matchedFile,
+                matchLoc,
+                matchText.replace("note-gallery", "NOTE_GALLERY"),
+                ...args,
+              );
+              return result;
+            } else result = old.call(this, matchedFile, matchLoc, matchText, ...args);
+            return result;
+          };
+        },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         onChange(old: any) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           return function (this: EmbeddedSearchDOMClass, ...args: any[]) {

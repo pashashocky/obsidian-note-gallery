@@ -30,7 +30,13 @@ declare module "obsidian" {
   }
 
   class EmbeddedSearchDOMClass {
-    addResult(): void;
+    addResult(
+      matchedFile: TFile,
+      matchLoc: number[][],
+      matchText: string,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ...args: any[]
+    ): void;
     changed(): void;
     children: SearchResultItemClass[];
     el: HTMLElement;
@@ -39,7 +45,7 @@ declare module "obsidian" {
     onChange(): void;
     parent?: EmbeddedSearchClass;
     patched: boolean;
-    removeResult(): void;
+    removeResult(file: TFile): void;
     resultDomLookup: Map<TFile, SearchResultItemClass>;
     setSortOrder(sortType: string): void;
     sortOrder: string;
