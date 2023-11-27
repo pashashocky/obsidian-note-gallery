@@ -150,7 +150,7 @@ export const useFiles = () => {
     };
 
     const reloadQueryFiles = (update: EmbeddedSearchDOMClass | undefined) => {
-      const local = embeddedSearch.dom;
+      const local = embeddedSearch?.dom;
       if (!local || !local.parent) return [];
       if (!update || !update.parent) return [];
       if (
@@ -183,10 +183,10 @@ export const useFiles = () => {
         setFiles(filteredFiles);
       }
     };
-    if (!files.length) reloadFiles(embeddedSearch.dom, true);
+    if (!files.length) reloadFiles(embeddedSearch?.dom, true);
 
     const debouncedReloadFiles = debounce(reloadFiles, DEBOUNCE_TIMEOUT, true);
-    const ready = () => debouncedReloadFiles(embeddedSearch.dom, true);
+    const ready = () => debouncedReloadFiles(embeddedSearch?.dom, true);
     app.workspace.on("search:onChange", debouncedReloadFiles);
     db.on("database-update", ready);
     return () => {

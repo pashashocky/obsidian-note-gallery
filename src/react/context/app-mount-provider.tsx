@@ -12,7 +12,7 @@ interface ContextProps {
   sourcePath: string;
   db: Database<dbHTMLEntry>;
   settings: Settings;
-  embeddedSearch: EmbeddedSearchClass;
+  embeddedSearch: EmbeddedSearchClass | undefined;
   children: ComponentChildren;
 }
 

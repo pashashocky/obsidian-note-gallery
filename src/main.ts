@@ -91,7 +91,6 @@ export default class NoteGalleryPlugin extends Plugin {
     this.patchCatchEmbeddedSearch();
 
     this.registerMarkdownCodeBlockProcessor("note-gallery", async (src, el, ctx) => {
-      await this.triggerEmbeddedSearchPatch();
       const handler = new CodeBlockNoteGallery(this, src, el, this.app, ctx);
       ctx.addChild(handler);
     });
@@ -142,8 +141,14 @@ export default class NoteGalleryPlugin extends Plugin {
                 child.hasOwnProperty("dom")
               ) {
                 const embeddedSearch = child as EmbeddedSearchClass;
-                plugin.EmbeddedSearch =
-                  embeddedSearch.constructor as typeof EmbeddedSearchClass;
+                if (!plugin.EmbeddedSearch) {
+                  plugin.EmbeddedSearch =
+                    embeddedSearch.constructor as typeof EmbeddedSearchClass;
+                  plugin.app.workspace.trigger(
+                    "catchEmbeddedSearch",
+                    embeddedSearch.constructor,
+                  );
+                }
                 if (plugin.EmbeddedSearchLeafInitializer) {
                   setTimeout(() => {
                     plugin.EmbeddedSearchLeafInitializer?.detach();

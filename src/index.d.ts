@@ -18,6 +18,11 @@ declare module "obsidian" {
       callback: (embeddedSearchDOM: EmbeddedSearchDOMClass) => void,
       ctx?: unknown,
     ): EventRef;
+    on(
+      name: "catchEmbeddedSearch",
+      callback: (embeddedSearchConstructor: typeof EmbeddedSearchClass) => void,
+      ctx?: unknown,
+    ): EventRef;
   }
 
   class EmbeddedSearchClass extends MarkdownRenderChild {
