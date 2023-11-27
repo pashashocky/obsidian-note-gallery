@@ -1,6 +1,13 @@
 import { useRef, useState, useLayoutEffect } from "preact/hooks";
 import { useAppMount } from "~/react/context/app-mount-provider";
-import { App, MarkdownRenderer, Component, MarkdownRenderChild, TFile } from "obsidian";
+import {
+  App,
+  Component,
+  MarkdownRenderChild,
+  MarkdownRenderer,
+  Platform,
+  TFile,
+} from "obsidian";
 import { dbHTMLEntry } from "~/main";
 
 export const appendOrReplaceFirstChild = (
@@ -63,8 +70,9 @@ export const useRenderMarkdown = (entry: dbHTMLEntry, file: TFile) => {
       let el: HTMLDivElement | null = null;
       if (entry.rendered && entry.innerHTML) {
         el = cachedMarkdown(entry.innerHTML);
-      } else if (entry.hasMarkdown && entry.markdown) {
-        el = await renderMarkdown(app, sourcePath, component, entry.markdown);
+      } else if (entry.hasMarkdown && entry.markdown && entry.markdownMobile) {
+        const markdown = Platform.isDesktopApp ? entry.markdown : entry.markdownMobile;
+        el = await renderMarkdown(app, sourcePath, component, markdown);
         if (
           !el.innerHTML.includes("pdf-embed") &&
           !el.innerHTML.includes("pdf-viewer") &&

@@ -1,4 +1,4 @@
-import { TFile } from "obsidian";
+import { Platform, TFile } from "obsidian";
 import { Fragment } from "preact";
 import { useRef } from "preact/hooks";
 
@@ -58,7 +58,9 @@ export default function CardMarkdownContentRenderer(
             }
           }}
         >
-          <div style={{ opacity: 0, whiteSpace: "pre-wrap" }}>{data.text}</div>
+          <div style={{ opacity: 0, whiteSpace: "pre-wrap" }}>
+            {Platform.isDesktopApp ? data.text : data.textMobile}
+          </div>
         </div>
       </div>
     </Fragment>

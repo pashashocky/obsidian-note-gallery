@@ -22,7 +22,9 @@ type ConstructableWorkspaceSplit = new (
 
 export interface dbHTMLEntry {
   text: string | null;
+  textMobile: string | null;
   markdown: string | null;
+  markdownMobile: string | null;
   innerHTML: string | null;
   hasMarkdown: boolean;
   rendered: boolean;
@@ -30,7 +32,9 @@ export interface dbHTMLEntry {
 
 const DEFAULT_DB_ENTRY: dbHTMLEntry = {
   text: null,
+  textMobile: null,
   markdown: null,
+  markdownMobile: null,
   innerHTML: null,
   hasMarkdown: false,
   rendered: false,
@@ -43,6 +47,7 @@ export async function extractValue(
 ): Promise<dbHTMLEntry> {
   // the idea of the below is to trim the content to the first n linesToKeep
   const linesToKeep = 200;
+  const linesToKeepMobile = 30;
   let frontmatter = "";
   if (markdown.startsWith("---")) {
     const i = markdown.indexOf("---", 3); // second instance
@@ -50,10 +55,14 @@ export async function extractValue(
     markdown = markdown.slice(i + 3, markdown.length).trim();
   }
   const text = markdown.split("\n").slice(0, linesToKeep).join("\n");
+  const textMobile = markdown.split("\n").slice(0, linesToKeepMobile).join("\n");
   markdown = [frontmatter, text].join("\n").trim();
+  const markdownMobile = [frontmatter, textMobile].join("\n").trim();
   return {
     text,
+    textMobile,
     markdown,
+    markdownMobile,
     hasMarkdown: true,
     innerHTML: null,
     rendered: false,
@@ -110,7 +119,7 @@ export default class NoteGalleryPlugin extends Plugin {
       this,
       "note-gallery-render-store",
       "Render Store",
-      3,
+      5,
       "Stores text and renderedHTML of a file to be rendered by the note gallery",
       () => DEFAULT_DB_ENTRY,
       extractValue,
