@@ -5,6 +5,8 @@ import NoteGalleryPlugin from "~/main";
 import NoteGalleryApp from "~/react";
 import getSettings, { Settings } from "~/code-block/settings";
 
+const timeout = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 export default class CodeBlockNoteGallery extends MarkdownRenderChild {
   private settings: Settings;
   private reactEl: HTMLElement;
@@ -28,7 +30,10 @@ export default class CodeBlockNoteGallery extends MarkdownRenderChild {
     searchEl.style.overflowY = "scroll";
 
     // better be safe with the native search
-    if (!this.plugin.EmbeddedSearch) await this.plugin.triggerEmbeddedSearchPatch();
+    while (!this.plugin.EmbeddedSearch) {
+      await this.plugin.triggerEmbeddedSearchPatch();
+      await timeout(250);
+    }
     const embeddedSearch = this.addChild(
       new this.plugin.EmbeddedSearch!(
         this.app,

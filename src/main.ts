@@ -89,9 +89,9 @@ export default class NoteGalleryPlugin extends Plugin {
   async onload() {
     this.db = this.registerDb();
     this.patchCatchEmbeddedSearch();
+    await this.triggerEmbeddedSearchPatch();
 
     this.registerMarkdownCodeBlockProcessor("note-gallery", async (src, el, ctx) => {
-      await this.triggerEmbeddedSearchPatch();
       const handler = new CodeBlockNoteGallery(this, src, el, this.app, ctx);
       ctx.addChild(handler);
     });
@@ -136,15 +136,22 @@ export default class NoteGalleryPlugin extends Plugin {
           return function (this: Component, child: unknown, ...args: never[]) {
             try {
               if (
-                !plugin.isEmbeddedSearchPatched &&
                 child instanceof Component &&
                 child.hasOwnProperty("searchQuery") &&
                 child.hasOwnProperty("sourcePath") &&
                 child.hasOwnProperty("dom")
               ) {
                 const embeddedSearch = child as EmbeddedSearchClass;
-                plugin.patchEmbeddedSearch(embeddedSearch);
-                plugin.isEmbeddedSearchPatched = true;
+                plugin.EmbeddedSearch =
+                  embeddedSearch.constructor as typeof EmbeddedSearchClass;
+                if (plugin.EmbeddedSearchLeafInitializer) {
+                  plugin.EmbeddedSearchLeafInitializer?.detach();
+                  plugin.EmbeddedSearchLeafInitializer = null;
+                }
+                if (!plugin.isEmbeddedSearchPatched) {
+                  plugin.patchEmbeddedSearch(embeddedSearch);
+                  plugin.isEmbeddedSearchPatched = true;
+                }
               }
             } catch (err) {
               console.log({ type: "Patching CatchEmbeddedSearch Error", err });
@@ -161,12 +168,6 @@ export default class NoteGalleryPlugin extends Plugin {
     const plugin = this;
     const EmbeddedSearchDOM = embeddedSearch.dom!
       .constructor as typeof EmbeddedSearchDOMClass;
-
-    plugin.EmbeddedSearch = embeddedSearch.constructor as typeof EmbeddedSearchClass;
-    setTimeout(() => {
-      plugin.EmbeddedSearchLeafInitializer?.detach();
-      plugin.EmbeddedSearchLeafInitializer = null;
-    }, 1000);
 
     this.register(
       around(embeddedSearch.constructor.prototype, {
@@ -268,6 +269,10 @@ export default class NoteGalleryPlugin extends Plugin {
   }
 
   async triggerEmbeddedSearchPatch() {
+    if (this.EmbeddedSearchLeafInitializer) {
+      this.EmbeddedSearchLeafInitializer.detach();
+      this.EmbeddedSearchLeafInitializer = null;
+    }
     const rootSplit: WorkspaceSplit =
       new (WorkspaceSplit as ConstructableWorkspaceSplit)(
         this.app.workspace,
