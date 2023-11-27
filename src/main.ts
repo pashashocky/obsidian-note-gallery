@@ -145,8 +145,10 @@ export default class NoteGalleryPlugin extends Plugin {
                 plugin.EmbeddedSearch =
                   embeddedSearch.constructor as typeof EmbeddedSearchClass;
                 if (plugin.EmbeddedSearchLeafInitializer) {
-                  plugin.EmbeddedSearchLeafInitializer?.detach();
-                  plugin.EmbeddedSearchLeafInitializer = null;
+                  setTimeout(() => {
+                    plugin.EmbeddedSearchLeafInitializer?.detach();
+                    plugin.EmbeddedSearchLeafInitializer = null;
+                  }, 100);
                 }
                 if (!plugin.isEmbeddedSearchPatched) {
                   plugin.patchEmbeddedSearch(embeddedSearch);

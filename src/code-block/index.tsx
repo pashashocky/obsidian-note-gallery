@@ -30,7 +30,7 @@ export default class CodeBlockNoteGallery extends MarkdownRenderChild {
     searchEl.style.overflowY = "scroll";
 
     // better be safe with the native search
-    while (!this.plugin.EmbeddedSearch) {
+    if (!this.plugin.EmbeddedSearch) {
       await this.plugin.triggerEmbeddedSearchPatch();
       await timeout(250);
     }
