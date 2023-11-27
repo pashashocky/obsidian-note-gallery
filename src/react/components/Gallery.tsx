@@ -1,4 +1,4 @@
-import { TFile } from "obsidian";
+import { Platform, TFile } from "obsidian";
 import { useState } from "preact/hooks";
 
 import Masonry from "~/react/masonry";
@@ -42,7 +42,7 @@ export default function Gallery() {
     200: 1,
   };
 
-  const itemsPerPage = 300;
+  const itemsPerPage = Platform.isDesktopApp ? 100 : 10;
   const { error, files } = useFiles();
   const [hasMore, setHasMore] = useState(true);
   const [numRendered, setNumRendered] = useState(itemsPerPage);
