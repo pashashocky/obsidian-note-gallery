@@ -89,9 +89,9 @@ export default class NoteGalleryPlugin extends Plugin {
   async onload() {
     this.db = this.registerDb();
     this.patchCatchEmbeddedSearch();
-    await this.triggerEmbeddedSearchPatch();
 
     this.registerMarkdownCodeBlockProcessor("note-gallery", async (src, el, ctx) => {
+      await this.triggerEmbeddedSearchPatch();
       const handler = new CodeBlockNoteGallery(this, src, el, this.app, ctx);
       ctx.addChild(handler);
     });
@@ -271,10 +271,6 @@ export default class NoteGalleryPlugin extends Plugin {
   }
 
   async triggerEmbeddedSearchPatch() {
-    if (this.EmbeddedSearchLeafInitializer) {
-      this.EmbeddedSearchLeafInitializer.detach();
-      this.EmbeddedSearchLeafInitializer = null;
-    }
     const rootSplit: WorkspaceSplit =
       new (WorkspaceSplit as ConstructableWorkspaceSplit)(
         this.app.workspace,
