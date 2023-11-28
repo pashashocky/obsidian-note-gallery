@@ -34,7 +34,8 @@ Note Gallery is a masonry style note gallery for [Obsidian](https://obsidian.md/
 query: 'tag:#mytag'  # optional: anything you'd put into an obsidian search query
                      # make sure to wrap into single quotes for any regex e.g.: '/\d/'
 debugQuery: false    # optional: false | true - display native search results to debug
-path: atlas          # optional: current note folder | path/to/folder
+path: atlas          # optional: current note folder | path/to/folder - you don't **need**
+                     # to use path if you are using query, path will source additional notes
 recursive: true      # optional: true | false
 limit: 10            # optional: 0 | any number
 sort: desc           # optional: desc | asc
