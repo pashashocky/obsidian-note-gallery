@@ -54,7 +54,7 @@
 }
 
 .note-card .inline-title {
-  display: block;
+  display: block !important;
   font-size: 12pt;
   font-weight: 600;
   color: var(--h3-color);
