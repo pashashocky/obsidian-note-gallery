@@ -46,15 +46,15 @@ export const renderMarkdown = async (
 };
 
 export const cachedMarkdown = (innerHTML: string) => {
+  const parser = new DOMParser();
   const div = document.createElement("div");
+  const parsedDocument = parser.parseFromString(innerHTML, "text/html");
+  const children = Array.from(parsedDocument.body.children);
+  for (const child of children) {
+    div.appendChild(child);
+  }
   div.style.height = "100%";
   div.style.width = "100%";
-
-  try {
-    div.innerHTML = innerHTML;
-  } catch (e) {
-    console.error(e);
-  }
   return div;
 };
 
