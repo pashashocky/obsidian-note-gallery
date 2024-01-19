@@ -28,6 +28,18 @@ Note Gallery is a masonry style note gallery for [Obsidian](https://obsidian.md/
 - Interactive view when clicking on folders in the file switcher.
 - Showing currently open tabs as a Masonry gallery.
 
+## Quickstart
+To get an idea of how syntax works, create a new blank note and copy/paste this entire syntax block into the note. Your masonry layout should show up right away. In this example, it will show your most recent 9 notes. If they do not show up immediately, create a new line in your note outside of the syntax block.
+
+When copying and pasting, be sure to include all 4 `~` characters at the beginning and all 4 `~` characters at the end of the syntax block.
+
+```
+~~~~note-gallery
+sort: desc
+limit: 9
+~~~~
+```
+
 ## Example Syntax
 ```
 ~~~~note-gallery     #           default | options
