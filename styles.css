@@ -44,7 +44,7 @@
 }
 
 .note-card:hover {
-  border: 1px solid var(--interactive-accent-tint);
+  border: 1px solid var(--interactive-accent);
 }
 
 .note-card hr {

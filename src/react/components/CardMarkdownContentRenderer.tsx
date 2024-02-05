@@ -41,7 +41,7 @@ export default function CardMarkdownContentRenderer(
         {settings.showtitle && (
           <hr
             style={{
-              borderTop: cached ? "" : "1px solid var(--interactive-accent-tint)",
+              borderTop: cached ? "" : "1px solid var(--interactive-accent)",
             }}
           />
         )}
