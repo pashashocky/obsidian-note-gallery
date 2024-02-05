@@ -22,6 +22,7 @@ Note Gallery is a masonry style note gallery for [Obsidian](https://obsidian.md/
     - `query: path:abc/deb OR path:atlas/notes` - notice the spacing differences without quotes
   - [x] `path` can be used to select an individual folder or recursively collect it
 - Has options for sorting, limiting # of results and recursively scanning folders.
+- Custom breakpoints for gallery columns
 
 ## Work in Progress
 - Actively working through issues.
@@ -54,12 +55,37 @@ sort: desc           # optional: desc | asc
 sortBy: mtime        # optional: mtime | ctime | name
 fontSize: 6pt        # optional: 6pt | NUMBERpt | NUMBERpx
 showTitle: true      # optional: true | false
+breakpoints:         # optional: allows to set breakpoints for number of columns
+  default: 4
+  100000: 10
+  3500: 10
+  3100: 9
+  2700: 8
+  2300: 7
+  1900: 6
+  1500: 5
+  1000: 4
+  700: 3
+  400: 2
+  200: 1
 ~~~~
+```
+
+## Responsive Breakpoints
+
+Different columns can be specified by passing an object containing key's of the window widths and their value as the number of columns. To have a fallback value, use the `default` key.
+
+```
+breakpoints:
+  default: 4,
+  1100: 3,
+  700: 2,
+  500: 1
 ```
 
 # Installation Instructions
 ## Community Plugin
-I've submitted an application to be included in obsidian community plugins - [show some love](https://github.com/obsidianmd/obsidian-releases/pull/2684)
+You can now install `Note Gallery` from community plugins of Obsidian!
 
 ## BRAT
 1. Install BRAT from the Community Plugins in Obsidian

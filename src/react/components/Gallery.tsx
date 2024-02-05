@@ -26,22 +26,7 @@ const Error = ({ error }: { error: string }) => {
 };
 
 export default function Gallery() {
-  const { app } = useAppMount();
-  const breakpointColumnsObj = {
-    default: 4,
-    100000: 10,
-    3500: 10,
-    3100: 9,
-    2700: 8,
-    2300: 7,
-    1900: 6,
-    1500: 5,
-    1000: 4,
-    700: 3,
-    400: 2,
-    200: 1,
-  };
-
+  const { app, settings } = useAppMount();
   const itemsPerPage = Platform.isDesktopApp ? 100 : 10;
   const { error, files } = useFiles();
   const [hasMore, setHasMore] = useState(true);
@@ -83,7 +68,7 @@ export default function Gallery() {
       {error && <Error error={error} />}
       {files.length > 0 && (
         <Masonry
-          breakpointCols={breakpointColumnsObj}
+          breakpointCols={settings.breakpoints}
           className="masonry-grid"
           columnClassName="masonry-grid_column"
         >

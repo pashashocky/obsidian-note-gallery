@@ -11,6 +11,7 @@ export interface Settings {
   fontsize: string;
   showtitle: boolean;
   debugquery: boolean;
+  breakpoints: number | { default: number; [key: number]: number };
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -23,6 +24,20 @@ const DEFAULT_SETTINGS: Settings = {
   fontsize: "6pt",
   showtitle: true,
   debugquery: false,
+  breakpoints: {
+    default: 4,
+    100000: 10,
+    3500: 10,
+    3100: 9,
+    2700: 8,
+    2300: 7,
+    1900: 6,
+    1500: 5,
+    1000: 4,
+    700: 3,
+    400: 2,
+    200: 1,
+  },
 };
 
 type AnyObject = { [key: string]: AnyObject };
