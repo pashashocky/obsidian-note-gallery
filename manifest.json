@@ -1,7 +1,7 @@
 {
 	"id": "note-gallery",
 	"name": "Note Gallery",
-	"version": "0.0.57",
+	"version": "0.0.58",
 	"minAppVersion": "1.2.0",
 	"description": "A masonry gallery view for your notes. Allows to have a birds eye view over the notes in your vault.",
 	"author": "Pash Shocky",
