@@ -77,7 +77,10 @@ const filterFileList = (
         return false;
       }
       // TODO: replace with global
-      return !data.markdown.contains("note-gallery");
+      return !(
+        data.markdown.contains("```note-gallery") ||
+        data.markdown.contains("~~~note-gallery")
+      );
     })
     .sort((a: TFile, b: TFile) => {
       const refA =
