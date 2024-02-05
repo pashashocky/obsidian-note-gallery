@@ -66,6 +66,10 @@
   font-size: var(--note-card-font-size);
 }
 
+.note-card .card-content img {
+  max-width: 100%;
+}
+
 .note-card .card-content-wall {
   position: absolute;
   top: 0;
