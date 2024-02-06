@@ -15,9 +15,9 @@ Note Gallery is a masonry style note gallery for [Obsidian](https://obsidian.md/
   - [x] Opimized the loading of markdown cards through caching.
   - [x] CRUD operations update the gallery.
 - Variety of filtering and searching options
-  - [x] `query` supports native obsidian search syntax! For example:
+  - [x] `query` supports native obsidian search syntax! Only include 1 (one) `query` argument in your code block. For example, here are several individual query examples you could use:
     - `query: '/(Regex: \d)/'`
-    - `query: tag:#mytag`
+    - `query: path: Atlas tag: #mytag`
     - `query: 'path: abc/deb OR path: atlas/notes'`
     - `query: path:abc/deb OR path:atlas/notes` - notice the spacing differences without quotes
   - [x] `path` can be used to select an individual folder or recursively collect it
