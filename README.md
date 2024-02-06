@@ -29,6 +29,9 @@ Note Gallery is a masonry style note gallery for [Obsidian](https://obsidian.md/
 - Interactive view when clicking on folders in the file switcher.
 - Showing currently open tabs as a Masonry gallery.
 
+## Known Issues!
+- [ ] When the `Settings -> Editor -> Default editing mode` is set to `Source Mode`. The Note Gallery will not render on Obsidian start or after `Reload app without saving`.
+
 ## Quickstart
 To get an idea of how syntax works, create a new blank note and copy/paste this entire syntax block into the note. Your masonry layout should show up right away. In this example, it will show your most recent 9 notes. If they do not show up immediately, create a new line in your note outside of the syntax block.
 
