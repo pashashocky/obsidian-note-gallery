@@ -1,10 +1,11 @@
 ![Note Gallery Example](assets/github-header.png)
 
 # What is it?
-Note Gallery is a masonry style note gallery for [Obsidian](https://obsidian.md/).
+Note Gallery is a [super-fast] masonry style note gallery for [Obsidian](https://obsidian.md/).
 
 - This plugin is currently in early alpha testing. It's functional but may contain some bugs.
 - Please feel free to leave any bugs or feature requests in issues.
+- I've tested this with a couple thousand notes and so far, I've been getting near-instant previews!
 
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/pashashocky?style=social)](https://github.com/sponsors/pashashocky)
 [<img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="BuyMeACoffee" width="100">](https://www.buymeacoffee.com/pashashocky)
