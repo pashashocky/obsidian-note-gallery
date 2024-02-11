@@ -285,6 +285,9 @@ export default class NoteGalleryPlugin extends Plugin {
     const textFile = new MarkdownView(leaf);
     textFile.setViewData("```query\n```", true);
     await leaf.open(textFile);
+    const viewState = leaf.getViewState();
+    viewState.state.source = false;
+    leaf.setViewState(viewState);
   }
 
   attachLeaf(rootSplit: WorkspaceSplit): WorkspaceLeaf {
