@@ -78,6 +78,7 @@ const filterFileList = (
   db: Database<dbHTMLEntry>,
   sourcePath: string,
   settings: Settings,
+  randomSeed: number = 50,
 ) => {
   const filteredFiles = files
     .filter(
@@ -113,7 +114,9 @@ const filterFileList = (
       const sort = settings.sort === "asc" ? -1 : 1;
       return refA < refB ? sort : refA > refB ? sort * -1 : 0;
     });
-  return settings.limit === 0 ? filteredFiles : filteredFiles.splice(0, settings.limit);
+
+  const sortedFiles = settings.sortrandom === true ? deterministicShuffle(filteredFiles, randomSeed) : filteredFiles;
+  return settings.limit === 0 ? sortedFiles : sortedFiles.splice(0, settings.limit);
 };
 
 const getSortOrder = (settings: Settings) => {
@@ -201,14 +204,8 @@ export const useFiles = () => {
       // deduplicate by file.path, keeping the newest ones
       const allFiles = [...files, ...reloadPathFiles(), ...reloadQueryFiles(update)];
       const newFiles = [...new Map(allFiles.map(file => [file.path, file])).values()];
-      const filteredFiles = filterFileList(newFiles, db, sourcePath, settings);
-      if (filteredFiles.length) {
-        if (settings.randomizeorder) {
-          setFiles(deterministicShuffle(filteredFiles, randomSeed.current))
-        } else {
-          setFiles(filteredFiles);
-        }
-      }
+      const filteredFiles = filterFileList(newFiles, db, sourcePath, settings, randomSeed.current);
+      setFiles(filteredFiles);
     };
     if (!files.length) reloadFiles(embeddedSearch?.dom, true);
 
