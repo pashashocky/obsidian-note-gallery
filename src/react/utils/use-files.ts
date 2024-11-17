@@ -205,7 +205,9 @@ export const useFiles = () => {
       const allFiles = [...files, ...reloadPathFiles(), ...reloadQueryFiles(update)];
       const newFiles = [...new Map(allFiles.map(file => [file.path, file])).values()];
       const filteredFiles = filterFileList(newFiles, db, sourcePath, settings, randomSeed.current);
-      setFiles(filteredFiles);
+      if (filteredFiles.length) {
+        setFiles(filteredFiles);
+      }
     };
     if (!files.length) reloadFiles(embeddedSearch?.dom, true);
 
