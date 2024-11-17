@@ -8,6 +8,7 @@ export interface Settings {
   recursive: boolean;
   sort: "asc" | "desc";
   sortby: "name" | "mtime" | "ctime";
+  randomizeorder: boolean;
   fontsize: string;
   showtitle: boolean;
   debugquery: boolean;
@@ -21,6 +22,7 @@ const DEFAULT_SETTINGS: Settings = {
   recursive: true,
   sort: "desc",
   sortby: "mtime",
+  randomizeorder: false,
   fontsize: "6pt",
   showtitle: true,
   debugquery: false,
