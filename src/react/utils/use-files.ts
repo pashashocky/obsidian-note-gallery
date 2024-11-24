@@ -8,7 +8,7 @@ import {
   Vault,
   debounce,
 } from "obsidian";
-import { useEffect, useState } from "preact/hooks";
+import { useEffect, useState, useRef } from "preact/hooks";
 
 import { Settings } from "~/code-block/settings";
 import { Database } from "~/index/database";
@@ -54,11 +54,31 @@ const getFileList = (app: App, settings: Settings) => {
   return { files: getFilesRecursive(folder.children, settings.recursive), error };
 };
 
+function hashStringWithSeed(str: string, seed: number) {
+  let hash = seed;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash * 31 + str.charCodeAt(i)) & 0xffffffff; // Simple hash function
+  }
+  return hash >>> 0; // Ensure non-negative integer
+}
+
+// Make sure that item order remains relatively fixed during re-renders to stop cards jumping around
+function deterministicShuffle(files: TFile[], seed: number) {
+  return files
+    .map((item) => ({
+      item,
+      sortKey: hashStringWithSeed(item.path, seed),
+    })) // Map each item to its hash
+    .sort((a, b) => a.sortKey - b.sortKey) // Sort by the hash values
+    .map(({ item }) => item); // Extract sorted items
+}
+
 const filterFileList = (
   files: TFile[],
   db: Database<dbHTMLEntry>,
   sourcePath: string,
   settings: Settings,
+  randomSeed: number = 50,
 ) => {
   const filteredFiles = files
     .filter(
@@ -94,7 +114,9 @@ const filterFileList = (
       const sort = settings.sort === "asc" ? -1 : 1;
       return refA < refB ? sort : refA > refB ? sort * -1 : 0;
     });
-  return settings.limit === 0 ? filteredFiles : filteredFiles.splice(0, settings.limit);
+
+  const sortedFiles = settings.sortrandom === true ? deterministicShuffle(filteredFiles, randomSeed) : filteredFiles;
+  return settings.limit === 0 ? sortedFiles : sortedFiles.splice(0, settings.limit);
 };
 
 const getSortOrder = (settings: Settings) => {
@@ -138,6 +160,7 @@ export const useFiles = () => {
   const { app, db, sourcePath, settings, embeddedSearch } = useAppMount();
   const [error, setError] = useState<string | null>(null);
   const [files, setFiles] = useState<TFile[]>([]);
+  const randomSeed = useRef(Math.floor(Math.random() * 100000));
 
   // TODO: magic number to global constant
   const DEBOUNCE_TIMEOUT = 100;
@@ -181,7 +204,7 @@ export const useFiles = () => {
       // deduplicate by file.path, keeping the newest ones
       const allFiles = [...files, ...reloadPathFiles(), ...reloadQueryFiles(update)];
       const newFiles = [...new Map(allFiles.map(file => [file.path, file])).values()];
-      const filteredFiles = filterFileList(newFiles, db, sourcePath, settings);
+      const filteredFiles = filterFileList(newFiles, db, sourcePath, settings, randomSeed.current);
       if (filteredFiles.length) {
         setFiles(filteredFiles);
       }
